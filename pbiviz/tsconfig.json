@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "allowJs": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "module": "es6",
+    "target": "ES6",
+    "sourceMap": false,
+    "outDir": "./.tmp/build/",
+    "moduleResolution": "node",
+    "declaration": true
+  },
+  "files": [
+    "src/barChart.ts",
+    "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.d.ts"
+  ]
+}

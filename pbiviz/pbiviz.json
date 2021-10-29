@@ -1,0 +1,27 @@
+{
+  "visual": {
+      "name": "Good Luck",
+      "displayName": "tableExample",
+      "guid": "tableExample04E649621A964F0491F29D514385D7FC",
+      "visualClassName": "Visual",
+      "version": "1.0.0",
+      "description": "A yuckly visual for bad api",
+      "supportUrl": "http://hell.com",
+      "gitHubUrl": "http://hell.com"
+  },
+  "apiVersion": "2.6.0",
+  "author": {
+      "name": "Michael Joye",
+      "email": "michael.joye@professionalitservices.org"
+  },
+  "assets": {
+      "icon": "assets/icon.png"
+  },
+  "externalJS": [
+    "node_modules/jquery/dist/jquery.js"
+  ],
+  "style": "style/visual.less",
+  "capabilities": "capabilities.json",
+  "dependencies": null,
+  "stringResources": []
+}
