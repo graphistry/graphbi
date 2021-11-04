@@ -1,45 +1,131 @@
 {
-    "dataRoles": [
-      {
-        "displayName": "Values",
-        "name": "values",
-        "kind": "GroupingOrMeasure"
-      }
-    ],
-    "dataViewMappings": [
-      {
+  "dataRoles": [
+    {
+        "displayNameKey": "Visual_Source",
+        "name": "Source",
+        "kind": "Grouping",
+        "displayName": "Source"
+    },
+    {
+        "displayNameKey": "Visual_Destination",
+        "name": "Destination",
+        "kind": "Grouping",
+        "displayName": "Destination "
+    },
+    {
+        "displayNameKey": "Visual_Weight",
+        "name": "Weight",
+        "kind": "Measure",
+        "displayName": "Weight"
+    },
+    {
+        "displayNameKey": "Visual_SourceType",
+        "name": "SourceType",
+        "kind": "Grouping",
+        "displayName": "Source Type"
+    },
+    {
+        "displayNameKey": "Visual_DestinationType",
+        "name": "Destination Type",
+        "kind": "Grouping",
+        "displayName": "Destination Type"
+    },
+    {
+      "displayNameKey": "Visual_EdgeType",
+      "name": "EdgeType",
+      "kind": "Grouping",
+      "displayName": "Edge Type"
+  }
+],
+"drilldown": {
+    "roles": [
+        "Source",
+        "Target"
+    ]
+},
+"dataViewMappings": [
+    {
         "conditions": [
-          {
-            "values": {
-              "min": 1,
-              "max": 5
+            {
+                "Source": {
+                    "max": 1
+                },
+                "Destination": {
+                    "max": 1
+                }
             }
-          }
         ],
-        "table": { "rows": { "for": { "in": "values" } } }
-      }
-    ],
-    "objects": {
-      "GraphistrySetting": {
-        "displayName": "Graphistry Setting",
-        "properties": {
-          "graphistryBaseUrl": {
-            "displayName": "Graphistry Server",
-            "type": { "text": true }
-          },
-          "graphistryUserName":{
-            "displayName": "Graphistry Username",
-            "type": { "text": true }
-          },
-          "graphistryPassword":{
-            "displayName": "Graphistry Password",
-            "type": { "text": true }
-          },
-          "graphistryDataSetId":{
-            "displayName": "Graphistry DataSet Id",
-            "type": { "text": true }
+        "categorical": {
+            "categories": {
+                "select": [
+                    {
+                        "for": {
+                            "in": "Source"
+                        }
+                    },
+                    {
+                        "for": {
+                            "in": "Destination"
+                        }
+                    },
+                    {
+                        "for": {
+                            "in": "EdgeType"
+                        }
+                    },
+                    {
+                        "for": {
+                            "in": "SourceType"
+                        }
+                    },
+                    {
+                        "for": {
+                            "in": "DestinationType"
+                        }
+                    }
+                ]
+            },
+            "values": {
+                "select": [
+                    {
+                        "bind": {
+                            "to": "Weight"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+],
+  "objects": {
+    "GraphistrySetting": {
+      "displayName": "Graphistry Setting",
+      "properties": {
+        "graphistryBaseUrl": {
+          "displayName": "Graphistry Server",
+          "type": {
+            "text": true
+          }
+        },
+        "graphistryUserName": {
+          "displayName": "Graphistry Username",
+          "type": {
+            "text": true
+          }
+        },
+        "graphistryPassword": {
+          "displayName": "Graphistry Password",
+          "type": {
+            "text": true
+          }
+        },
+        "graphistryDataSetId": {
+          "displayName": "Graphistry DataSet Id",
+          "type": {
+            "text": true
           }
         }
       }
     }
   }
+}

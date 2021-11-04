@@ -41,10 +41,23 @@ export class GraphistryService
 
     public GetDataSetFrameUrl():Promise<string>
     {
-        return this.AuthToGraphistry().then(()=>{
-            return Promise.resolve("hello World");
-        })
+        return this.AuthToGraphistry()
+            .then(this.ProcessEdges)
+            .then(()=>{
+                return Promise.resolve("hello");
+            })
        
+    }
+
+    private ProcessEdges(): Promise<void> {
+       return this.CreateFile().then(()=>{
+           return Promise.resolve();
+       })
+    }
+
+
+    private CreateFile(): Promise<string> {
+        throw new Error("Method not implemented.");
     }
 
      
@@ -52,6 +65,21 @@ export class GraphistryService
 
     private  AuthToGraphistry() :Promise<any>
     {
+
+        if(this.username === "")
+        {
+            return Promise.reject("No User Name Set");
+        }
+
+        if(this.password === "")
+        {
+            return Promise.reject("No Password Set");
+        }
+
+        if(this.authToken != "")
+        {
+            return Promise.resolve();
+        }
         var authUrl= this.GetGraphistryBaseUrl()+"/api/v2/auth/token/generate";
         return this.PostToApi(authUrl,{
             "username":this.username,
@@ -59,11 +87,14 @@ export class GraphistryService
         })
         .then((authReponse: Response)=> {
             return authReponse.json();
-        }).then(this.ProcessAuthReponse);
+        }).then((AuthObject)=>{
+            return this.ProcessAuthReponse(AuthObject);
+        });
     }
 
 
     private ProcessAuthReponse(authBody: any): Promise<any> {
+        debugger;
        this.authToken=authBody.token;
        return Promise.resolve(true);
     }
@@ -92,5 +123,97 @@ export class GraphistryService
         return "https://"+this.baseUrl;
     }
 
+
+    
+
+
+}
+
+interface GraphistryConfiguration
+{
+    UserName:string;
+    Password:string;
+    UrlBase:string;
+    AuthToken:string;
+}
+
+const  config:GraphistryConfiguration = 
+{
+    UserName:"",
+    Password:"",
+    UrlBase:"",
+    AuthToken:""
+}
+
+
+export {config};
+
+
+
+export class GraphistryClient
+{
+
+    private static _username:string;
+    private static _password:string;
+    private static _urlbase:string;
+    private static _authToken:string;
+
+    public Post(Uri:string, Payload:any):Promise<any>
+    {
+        var headers=this.getBaseHeaders();
+        return this.GetAuthToken().then(response=>{
+            headers["Authorization"] = 'Bearer '+response;
+            return this.PostToApi(Uri,Payload,headers)
+        })
+    }
+
+
+    private GetAuthToken():Promise<string>
+    {
+        if(config.AuthToken!= "" && this.AuthTokenValid())
+        {
+            return Promise.resolve(config.AuthToken);
+        }
+
+        return this.PostToApi("api/v2/auth/token/generate",
+                            { username: config.UserName, password: config.Password },
+                            this.getBaseHeaders())
+                            .then((response)=>{
+                                config.AuthToken=response.token;
+                                return Promise.resolve(config.AuthToken);
+                            })
+
+    }
+
+
+    private AuthTokenValid():boolean
+    {
+        return true;
+    }
+
+    private PostToApi(url:string,data,headers:HeadersInit):Promise<any>
+    {
+        return fetch(this.getBaseUrl()+url,{
+            method:'POST',
+            headers:headers,
+            body: JSON.stringify(data)
+        }).then((response)=>{
+            return response.json();
+        })
+    }
+
+
+    private getBaseHeaders():HeadersInit
+    {
+        return {
+            'Accept': "application/json",
+            'Content-Type': "application/json",
+        };
+    }
+
+    private getBaseUrl():string
+    {
+        return "https://"+config.UrlBase+"/";
+    }
 
 }
