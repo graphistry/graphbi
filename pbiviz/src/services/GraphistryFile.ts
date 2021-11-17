@@ -31,7 +31,7 @@ export class GraphistryFile{
 
     public CreateFile():Promise<boolean>
     {
-        debugger;
+        //debugger;
         if(this._fileCreated)
         {
             return Promise.resolve(this._fileCreated);
@@ -48,7 +48,7 @@ export class GraphistryFile{
 
     public UploadData():Promise<boolean>
     {
-        debugger;
+        //debugger;
         if(this._fileUploaded)
         {
             return Promise.resolve(this._fileUploaded);

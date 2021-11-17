@@ -94,7 +94,7 @@ export class GraphistryService
 
 
     private ProcessAuthReponse(authBody: any): Promise<any> {
-        debugger;
+        //debugger;
        this.authToken=authBody.token;
        return Promise.resolve(true);
     }
