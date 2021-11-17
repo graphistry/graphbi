@@ -1,0 +1,80 @@
+version: "3.9"
+
+networks:
+  grph_net:
+    name: grph_net
+    ipam:
+      driver: default
+
+x-build-kwargs:
+  &build_kwargs
+  args:
+      - APP_BUILD_TAG=${APP_BUILD_TAG:-latest-dev}
+  context: .
+
+x-development-options:
+  &development_opts
+  networks:
+    - grph_net
+  logging:
+    driver: json-file
+    options:
+      compress: "true"
+      max-size: "10m"
+      max-file: "10"
+      mode: "non-blocking"
+      max-buffer-size: "5m"
+      tag: "{{.ImageName}}/{{.Name}}/{{.ID}}"
+# https://github.com/seccomp/libseccomp/issues/153
+  security_opt:  # Purely for local dev / ci perf
+      - seccomp:unconfined
+
+services:
+
+  pbi:
+    << : *development_opts
+    image:  graphistry/pbi:${APP_BUILD_TAG:-latest-dev}
+    build:
+      << : *build_kwargs
+      dockerfile: ./Dockerfile
+    init: true
+    environment:
+      - NODE_ENV=development
+    command:
+      - ./node_modules/.bin/pbiviz
+      - start
+    ports:
+      - "8080:8080"
+    volumes:
+      - ${CERTS_PATH}:/opt/graphbi/pbiviz/node_modules/powerbi-visuals-tools/certs:ro
+      - ${PWD}/capabilities.json:/opt/graphbi/pbiviz/capabilities.json:ro
+      - ${PWD}/pbiviz.json:/opt/graphbi/pbiviz/pbiviz.json:ro
+      - ${PWD}/tsconfig.json:/opt/graphbi/pbiviz/tsconfig.json:ro
+      - ${PWD}/src:/opt/graphbi/pbiviz/src:ro
+    #healthcheck:
+    #  test: ["CMD", "curl", "-k", "--fail", "--silent", "--output", "/dev/null", "--head", "--write-out", "%{http_code}", "https://localhost:8080/assets/status"]
+    #  interval: 1m30s
+    #  timeout: 30s
+    #  retries: 5
+    #  start_period: 30s
+
+  # storybook:
+  #   << : *production_opts
+  #   image:  graphistry/graphistry-js:${APP_BUILD_TAG:-latest}
+  #   ports:
+  #     - "6006:6006"
+  #   init: true
+  #   working_dir: /opt/graphistry-js/projects/client-api-react
+  #   environment:
+  #     - NODE_OPTIONS=--max_old_space_size=6144
+  #     - NODE_ENV=development
+  #   command:
+  #     - ./node_modules/.bin/start-storybook
+  #     - -p 6006
+  #     - --debug-webpack
+  #   volumes:
+  #     - ./projects/client-api/src:/opt/graphistry-js/projects/client-api/src:ro
+  #     - ./projects/client-api-react/package.json:/opt/graphistry-js/projects/client-api-react/package.json:ro
+  #     - ./projects/client-api-react/src:/opt/graphistry-js/projects/client-api-react/src:ro
+  #     - ./projects/client-api-react/assets:/opt/graphistry-js/projects/client-api-react/assets:ro
+  #     - ./projects/client-api-react/.storybook:/opt/graphistry-js/projects/client-api-react/.storybook:ro
