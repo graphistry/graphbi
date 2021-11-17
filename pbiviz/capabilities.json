@@ -98,8 +98,8 @@
     }
 ],
   "objects": {
-    "GraphistrySetting": {
-      "displayName": "Graphistry Setting",
+    "graphistrySetting": {
+      "displayName": "Graphistry Settings",
       "properties": {
         "graphistryBaseUrl": {
           "displayName": "Graphistry Server",
@@ -119,8 +119,8 @@
             "text": true
           }
         },
-        "graphistryDataSetId": {
-          "displayName": "Graphistry DataSet Id",
+        "graphistryDatasetOverride": {
+          "displayName": "Dataset ID override",
           "type": {
             "text": true
           }

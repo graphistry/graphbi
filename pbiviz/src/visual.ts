@@ -36,9 +36,11 @@ export class Visual implements IVisual {
         
         this.rootElement.empty();
         this.visualSettings = VisualSettings.parse<VisualSettings>(options.dataViews[0]);
-        config.Password = this.visualSettings.GraphistrySetting.graphistryPassword;
-        config.UrlBase = this.visualSettings.GraphistrySetting.graphistryBaseUrl;
-        config.UserName=this.visualSettings.GraphistrySetting.graphistryUserName;
+
+        config.Password = this.visualSettings.graphistrySetting.graphistryPassword;
+        config.UrlBase = this.visualSettings.graphistrySetting.graphistryBaseUrl;
+        config.UserName = this.visualSettings.graphistrySetting.graphistryUserName;
+        config.DatasetOverride = this.visualSettings.graphistrySetting.graphistryDatasetOverride;        
 
 
         

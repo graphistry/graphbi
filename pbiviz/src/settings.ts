@@ -6,12 +6,12 @@ import DataViewObjectsParser = dataViewObjectsParser.DataViewObjectsParser;
 class GraphistrySetting
 {
     public graphistryBaseUrl: string = "hub.graphistry.com";
-    public graphistryUserName:string ="";
-    public graphistryPassword:string ="";
-    public graphistryDataSetId:string="";
+    public graphistryUserName: string = "";
+    public graphistryPassword: string = "";
+    public graphistryDatasetOverride: string = "";
 }
 
 export class VisualSettings extends DataViewObjectsParser
 {
-    public GraphistrySetting: GraphistrySetting = new GraphistrySetting();
+    public graphistrySetting: GraphistrySetting = new GraphistrySetting();
 }

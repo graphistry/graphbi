@@ -1,18 +1,18 @@
 {
   "visual": {
-      "name": "Good Luck",
-      "displayName": "tableExample",
+      "name": "Graphistry for PowerBI",
+      "displayName": "Graphistry",
       "guid": "tableExample04E649621A964F0491F29D514385D7FC",
       "visualClassName": "Visual",
       "version": "1.0.0",
-      "description": "A yuckly visual for bad api",
-      "supportUrl": "http://hell.com",
-      "gitHubUrl": "http://hell.com"
+      "description": "",
+      "supportUrl": "graphistry.com",
+      "gitHubUrl": "https://github.com/graphistry/graphbi"
   },
-  "apiVersion": "2.6.0",
+  "apiVersion": "4.0.0",
   "author": {
-      "name": "Michael Joye",
-      "email": "michael.joye@professionalitservices.org"
+      "name": "Graphistry, Inc.",
+      "email": "build@graphistry.com"
   },
   "assets": {
       "icon": "assets/icon.png"
