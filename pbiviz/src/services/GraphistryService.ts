@@ -10,8 +10,10 @@ export class GraphistryService
     private edges:Object;
     private dataSetSettings:Object;
     
-    private currentDataSetId:string="";
+    private currentDatasetID:string="";
     private authToken:string="";
+
+    private datasetOverride:string="";
 
 
     public SetUserName(name:string) {
@@ -35,6 +37,11 @@ export class GraphistryService
     public SetDataSetConfig(settings:Object)
     {
         this.dataSetSettings=settings;
+    }
+
+    public SetDatasetOverride(datasetID:string)
+    {
+        this.datasetOverride = datasetID;
     }
 
 
@@ -135,6 +142,7 @@ interface GraphistryConfiguration
     Password:string;
     UrlBase:string;
     AuthToken:string;
+    DatasetOverride:string;
 }
 
 const  config:GraphistryConfiguration = 
@@ -142,7 +150,8 @@ const  config:GraphistryConfiguration =
     UserName:"",
     Password:"",
     UrlBase:"",
-    AuthToken:""
+    AuthToken:"",
+    DatasetOverride: ""
 }
 
 

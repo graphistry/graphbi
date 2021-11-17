@@ -103,7 +103,7 @@ export class Visual implements IVisual {
 
     private GetGraphistryBaseUrl():string
     {
-        return "https://"+this.visualSettings.GraphistrySetting.graphistryBaseUrl;
+        return "https://"+this.visualSettings.graphistrySetting.graphistryBaseUrl;
     }
 
   
