@@ -9,6 +9,9 @@ on:
   pull_request:
     branches: [ main ]
 
+defaults:
+  run:
+    working-directory: ./pbiviz
 jobs:
   build:
 
@@ -16,7 +19,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x]
+        node-version: [17.x]
 
     steps:
     - uses: actions/checkout@v2

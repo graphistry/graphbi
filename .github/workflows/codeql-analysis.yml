@@ -20,6 +20,10 @@ on:
   schedule:
     - cron: '20 13 * * 2'
 
+defaults:
+  run:
+    working-directory: ./pbiviz
+
 jobs:
   analyze:
     name: Analyze
