@@ -5,11 +5,11 @@
       "guid": "tableExample04E649621A964F0491F29D514385D7FC",
       "visualClassName": "Visual",
       "version": "1.0.0",
-      "description": "",
+      "description": "Graph visualization with GPU acceleration",
       "supportUrl": "graphistry.com",
       "gitHubUrl": "https://github.com/graphistry/graphbi"
   },
-  "apiVersion": "4.0.0",
+  "apiVersion": "3.8.0",
   "author": {
       "name": "Graphistry, Inc.",
       "email": "build@graphistry.com"
