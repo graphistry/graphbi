@@ -1,4 +1,4 @@
-import {GraphistryClient} from "./GraphistryService"
+import {GraphistryClient} from "./GraphistryClient"
 import { v4 as uuidv4 } from 'uuid';
 export enum GraphistryFileType
 {
@@ -19,6 +19,8 @@ export class GraphistryFile{
     private _data;
     private _graphistryClient:GraphistryClient;
 
+    public get fileID():string{ return this._fileId;}
+
     constructor(type:GraphistryFileType)
     {
         this.FileType="json"
@@ -27,11 +29,8 @@ export class GraphistryFile{
         this._graphistryClient= new GraphistryClient();
     }
 
-    
-
     public CreateFile():Promise<boolean>
     {
-        //debugger;
         if(this._fileCreated)
         {
             return Promise.resolve(this._fileCreated);
@@ -39,6 +38,7 @@ export class GraphistryFile{
         return this._graphistryClient.Post("api/v2/files/",{
             file_type:this.FileType
         }).then((fileJsonResults)=>{
+            console.log('fileJsonResults', {fileJsonResults})
             this._fileId=fileJsonResults.file_id;
             this._fileCreated=true;
             return Promise.resolve(this._fileCreated);
@@ -48,13 +48,13 @@ export class GraphistryFile{
 
     public UploadData():Promise<boolean>
     {
-        //debugger;
         if(this._fileUploaded)
         {
             return Promise.resolve(this._fileUploaded);
         }
-        return this._graphistryClient.Post("api/v2/upload/files/"+this._fileId+"/",this._data)
+        return this._graphistryClient.Post("api/v2/upload/files/"+this._fileId+"?erase=true&orient=columnar",this._data)
             .then((results)=>{
+                console.log('UploadData', {results});
                 this._fileUploaded=results.is_uploaded;
                 return Promise.resolve(this._fileUploaded);
             })
