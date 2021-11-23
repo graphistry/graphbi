@@ -16,7 +16,7 @@
         "displayNameKey": "Visual_Weight",
         "name": "Weight",
         "kind": "Measure",
-        "displayName": "Weight"
+        "displayName": "Edge weight"
     },
     {
         "displayNameKey": "Visual_SourceType",
@@ -34,7 +34,7 @@
       "displayNameKey": "Visual_EdgeType",
       "name": "EdgeType",
       "kind": "Grouping",
-      "displayName": "Edge Type"
+      "displayName": "Edge property"
   }
 ],
 "drilldown": {
@@ -97,6 +97,7 @@
         }
     }
 ],
+"advancedEditModeSupport": 1,
   "objects": {
     "graphistrySetting": {
       "displayName": "Graphistry Settings",
