@@ -2,6 +2,23 @@
 [![Build Status](https://travis-ci.org/Microsoft/PowerBI-visuals-samplebarchart.svg?branch=master)](https://travis-ci.org/Microsoft/PowerBI-visuals-samplebarchart)
 Bar Chart Custom Visual sample.
 
+## Bundle
+
+```bash
+./dc.sh build pbi
+./bin/package.sh
+```
+
+Creates `dist/`
+
+## Develop
+
+### Regenerate package lock
+
+In host: `npm i --package-lock-only`
+
+(TODO: as docker cmd)
+
 
 ### Setting Up Development Environment
 
@@ -35,8 +52,8 @@ Create PowerBI dev account:
 ### Build, launch, and live-edit
 
 ```bash
-./dc.dev.sh build
-./dc.dev.sh up
+./dc.dev.sh build  # docker compose -f docker-compose.dev.yml build
+./dc.dev.sh up     # docker compose -f docker-compose.dev.yml up
 ```
 
 TLS-protected URL `https://localhost:8080/assets/status` should now work
