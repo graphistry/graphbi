@@ -15,17 +15,17 @@ export class GraphistryDataSet
     constructor()
     {
         this._graphistryClient= new GraphistryClient();
-        this._nodeFiles = new Array();
-        this._edgeFiles = new Array();
+        this._nodeFiles = [];
+        this._edgeFiles = [];
     }
 
-    public GetGraphUrl():Promise<string> {
+    public getGraphUrl():Promise<string> {
         const uploadedFiles = Promise.all(
             (this._nodeFiles.concat(this._edgeFiles)).map((file)=>{
-                return file.CreateFile()
+                return file.createFile()
                     .then((response)=>{ 
                         if (response) {
-                            return file.UploadData();
+                            return file.uploadData();
                         }
                         throw new Error("File creation failed 1");
                     })
@@ -47,9 +47,9 @@ export class GraphistryDataSet
             const bindings = {...fileBindings, ...this._bindings};
             console.debug("combined Bindings", bindings);
 
-            return this.CreateDataSet(bindings);
+            return this.createDataSet(bindings);
             /*
-            return this._graphistryClient.Post("api/v2/files/",{
+            return this._graphistryClient.post("api/v2/files/",{
                 file_type:this.FileType
             }).then((fileJsonResults)=>{
                 this._fileId=fileJsonResults.file_id;
@@ -61,8 +61,8 @@ export class GraphistryDataSet
         })
     }
 
-    public CreateDataSet(data:Object):Promise<string> {
-        return this._graphistryClient.Post("api/v2/upload/datasets/",data)
+    public createDataSet(data:Object):Promise<string> {
+        return this._graphistryClient.post("api/v2/upload/datasets/",data)
         .then((dataJsonResults)=>{
             console.debug("DataSet Created", dataJsonResults);
             this._datasetID = dataJsonResults.data.dataset_id;
@@ -72,11 +72,11 @@ export class GraphistryDataSet
         })
     }
 
-    public AddBindings(bindings: Object): void {
+    public addBindings(bindings: Object): void {
         this._bindings = bindings;
     }
 
-    public AddFile(file: GraphistryFile) {
+    public addFile(file: GraphistryFile) {
         if (file.Type === GraphistryFileType.Node) {
             this._nodeFiles.push(file);
         } else if (file.Type === GraphistryFileType.Edge) {

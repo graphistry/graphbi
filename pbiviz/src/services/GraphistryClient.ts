@@ -14,7 +14,7 @@ const config:GraphistryConfiguration = {
     DatasetOverride: ""
 };
 
-export {config};
+export { config }; // tslint:disable-line
 
 export class GraphistryClient {
 
@@ -22,24 +22,24 @@ export class GraphistryClient {
         return config.UserName !== "" && config.Password !== "" && config.UrlBase !== "";
     }
 
-    public Post(Uri:string, Payload:any):Promise<any> {
-        console.debug('@Post', {Uri, Payload});
+    public post(Uri:string, Payload:any):Promise<any> {
+        console.debug('@post', {Uri, Payload});
 
         var headers=this.getBaseHeaders();
-        return this.GetAuthToken().then(response=>{
+        return this.getAuthToken().then(response=>{
             headers["Authorization"] = 'Bearer '+response;
-            return this.PostToApi(Uri,Payload,headers)
+            return this.postToApi(Uri,Payload,headers)
         })
     }
 
-    private GetAuthToken():Promise<string> {
+    private getAuthToken():Promise<string> {
         console.debug('@GetAuthToken');
 
-        if (config.AuthToken != "" && this.AuthTokenValid()) {
+        if (config.AuthToken != "" && this.authTokenValid()) {
             return Promise.resolve(config.AuthToken);
         }
 
-        return this.PostToApi("api/v2/auth/token/generate",
+        return this.postToApi("api/v2/auth/token/generate",
                             { username: config.UserName, password: config.Password },
                             this.getBaseHeaders())
                             .then((response)=>{
@@ -51,13 +51,13 @@ export class GraphistryClient {
     }
 
 
-    private AuthTokenValid():boolean
+    private authTokenValid():boolean
     {
         return true;
     }
 
-    private PostToApi(url:string,data,headers:HeadersInit):Promise<any> {
-        console.debug('@PostToApi', {url,data,headers});
+    private postToApi(url:string,data,headers:HeadersInit):Promise<any> {
+        console.debug('@postToApi', {url,data,headers});
         return fetch(this.getBaseUrl()+url,{
             method:'POST',
             headers:headers,

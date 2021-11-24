@@ -29,13 +29,13 @@ export class GraphistryFile{
         this._graphistryClient= new GraphistryClient();
     }
 
-    public CreateFile():Promise<boolean>
+    public createFile():Promise<boolean>
     {
         if(this._fileCreated)
         {
             return Promise.resolve(this._fileCreated);
         }
-        return this._graphistryClient.Post("api/v2/files/",{
+        return this._graphistryClient.post("api/v2/files/",{
             file_type:this.FileType
         }).then((fileJsonResults)=>{
             console.log('fileJsonResults', {fileJsonResults})
@@ -46,22 +46,22 @@ export class GraphistryFile{
         
     }
 
-    public UploadData():Promise<boolean>
+    public uploadData():Promise<boolean>
     {
         if(this._fileUploaded)
         {
             return Promise.resolve(this._fileUploaded);
         }
-        return this._graphistryClient.Post("api/v2/upload/files/"+this._fileId+"?erase=true&orient=columnar",this._data)
+        return this._graphistryClient.post("api/v2/upload/files/"+this._fileId+"?erase=true&orient=columnar",this._data)
             .then((results)=>{
-                console.log('UploadData', {results});
+                console.log('uploadData', {results});
                 this._fileUploaded=results.is_uploaded;
                 return Promise.resolve(this._fileUploaded);
             })
     }
 
 
-    public SetData(data:any) {
+    public setData(data:any) {
        this._data=data;
     }
 

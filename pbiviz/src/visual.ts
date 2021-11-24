@@ -4,7 +4,7 @@
 //import "core-js/stable";
 //import 'regenerator-runtime/runtime'
 import "./../style/visual.less";
-import powerbi from "powerbi-visuals-api";
+import powerbi from "powerbi-visuals-api"; // tslint:disable-line
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
@@ -15,7 +15,7 @@ import VisualObjectInstance = powerbi.VisualObjectInstance;
 import DataView = powerbi.DataView;
 import VisualObjectInstanceEnumerationObject = powerbi.VisualObjectInstanceEnumerationObject;
 import { dataViewObjects } from "powerbi-visuals-utils-dataviewutils";
-import { VisualSettings } from "./settings";
+import { VisualSettings } from "./VisualSettings";
 import { DataViewObjectsParser } from "powerbi-visuals-utils-dataviewutils/lib/dataViewObjectsParser";
 
 import {GraphistryDataSet} from "./services/GraphistryDataset";
@@ -40,7 +40,7 @@ export class Visual implements IVisual {
         this.rootElement = $(options.element);
         this.rootElement.append("<h2>Graphistry Visual: First set fields Source and Destination</h2>");
 
-        this.visualSettings = VisualSettings.getDefault() as VisualSettings;
+        this.visualSettings = <VisualSettings> VisualSettings.getDefault();
         console.debug('////constructed');
     }
 
@@ -140,7 +140,7 @@ export class Visual implements IVisual {
 
         // if(this.visualSettings.GraphistrySetting.graphistryDataSetId != "")
         // {
-        //     var dataSetFrameUrl= this.GetGraphistryBaseUrl()+"/graph/graph.html?dataset="+this.visualSettings.GraphistrySetting.graphistryDataSetId;
+        //     var dataSetFrameUrl= this.getGraphistryBaseUrl()+"/graph/graph.html?dataset="+this.visualSettings.GraphistrySetting.graphistryDataSetId;
 
         //     var frame=$('<iframe />', {
         //         name: 'frame1',
@@ -157,7 +157,7 @@ export class Visual implements IVisual {
 
         console.debug('Visual::updateIframeOverride()', {datasetID});
         this.rootElement.empty();
-        const url = this.GetGraphistryBaseUrl() + "/graph/graph.html?dataset=" + datasetID + "&play=3000";
+        const url = this.getGraphistryBaseUrl() + "/graph/graph.html?dataset=" + datasetID + "&play=3000";
         const iframeUrl = url + "&splashAfter=true";
         const linkUrl = url + "&splashAfter=true";
         var frame=$('<iframe />', {
@@ -175,6 +175,62 @@ export class Visual implements IVisual {
         console.debug('////Visual::updateIframeOverride');
     }
 
+    private uploadDataset(view) {
+
+        this.rootElement.empty();
+        this.rootElement.append("<h2>Graphistry Visual: Uploading data...</h2>");
+
+        /*
+        var nodeFile = new GraphistryFile(GraphistryFileType.Node);
+        nodeFile.setData({
+            "n":["a","b","c"],
+            "v":[2,4,6],
+            "v2":["a","aa","aaa"]
+        });
+        */
+        var edgeFile = new GraphistryFile(GraphistryFileType.Edge);
+
+        const srcColMetadata = view.metadata.columns.find(c => c.roles.Source);
+        const srcColName = srcColMetadata.queryName;
+        const srcCol = view.categorical.categories[srcColMetadata.index];
+        const dstColMetadata = view.metadata.columns.find(c => c.roles.Destination);
+        const dstColName = dstColMetadata.queryName;
+        const dstCol = view.categorical.categories[dstColMetadata.index];
+        const edgePropertyMetadatas = view.metadata.columns.filter(c => c.roles.EdgeProperty);
+        const edgeWeightMetadata = view.metadata.columns.find(c => c.roles.EdgeWeight);
+        //categorical.values because measure?
+        const edgeWeightCol = edgeWeightMetadata ? view.categorical.categories[edgeWeightMetadata.index] : undefined;
+        const edgeWeightColName = edgeWeightMetadata ? edgeWeightMetadata.queryName : undefined;
+        edgeFile.setData({
+            [srcColName]: srcCol.values,
+            [dstColName]: dstCol.values,
+            ...Object.fromEntries(edgePropertyMetadatas.map(c => [c.queryName, view.categorical.categories[c.index].values])),
+            ...(edgeWeightMetadata ? {[edgeWeightColName]: edgeWeightCol.values} : {})
+        });
+
+        var dataSet = new GraphistryDataSet();
+        //dataSet.addFile(nodeFile);
+        dataSet.addFile(edgeFile);
+        dataSet.addBindings({
+            "node_encodings": {
+                "bindings": {
+                    "node":"n"
+                }
+            },
+            "edge_encodings": {
+                "bindings": {
+                    "source": srcColName,
+                    "destination": dstColName,
+                    ...(edgeWeightMetadata ? { "edge_weight": edgeWeightCol.values } : {})
+                }
+            },
+            "metadata": {},
+            "name": "testdata"
+        })
+        this.rootElement.append("Created local schema, now uploading...");
+        return dataSet.getGraphUrl();
+    }
+
     public update(options: VisualUpdateOptions, viewModel) {
         console.debug('Visual::update()', {options, viewModel});
         const view = options.dataViews[0];
@@ -184,7 +240,6 @@ export class Visual implements IVisual {
         config.UserName = this.visualSettings.graphistrySetting.graphistryUserName;
         config.Password = this.visualSettings.graphistrySetting.graphistryPassword;
         config.DatasetOverride = this.visualSettings.graphistrySetting.graphistryDatasetOverride;
-
 
         if (config.DatasetOverride) {
             console.debug('as DatasetOverride', {datasetOverride: config.DatasetOverride});
@@ -207,101 +262,16 @@ export class Visual implements IVisual {
         
         console.debug('update readyForUpload, continue');
 
-       
-        this.rootElement.empty();
-        this.rootElement.append("<h2>Graphistry Visual: Uploading data...</h2>");
-
-        /*
-        var nodeFile = new GraphistryFile(GraphistryFileType.Node);
-        nodeFile.SetData({
-            "n":["a","b","c"],
-            "v":[2,4,6],
-            "v2":["a","aa","aaa"]
-        });
-        */
-        var edgeFile = new GraphistryFile(GraphistryFileType.Edge);
-
-        const srcColMetadata = view.metadata.columns.find(c => c.roles.Source);
-        const srcColName = srcColMetadata.queryName;  //TODO displaName?
-        const srcCol = view.categorical.categories[srcColMetadata.index];
-        const dstColMetadata = view.metadata.columns.find(c => c.roles.Destination);
-        const dstColName = dstColMetadata.queryName;  //TODO displaName?
-        const dstCol = view.categorical.categories[dstColMetadata.index];
-        const edgePropertyMetadatas = view.metadata.columns.filter(c => c.roles.EdgeProperty);
-        const edgeWeightMetadata = view.metadata.columns.find(c => c.roles.EdgeWeight);
-        //categorical.values because measure?
-        const edgeWeightCol = edgeWeightMetadata ? view.categorical.categories[edgeWeightMetadata.index] : undefined;
-        const edgeWeightColName = edgeWeightMetadata ? edgeWeightMetadata.queryName : undefined;
-        edgeFile.SetData({
-            [srcColName]: srcCol.values,
-            [dstColName]: dstCol.values,
-            ...Object.fromEntries(edgePropertyMetadatas.map(c => [c.queryName, view.categorical.categories[c.index].values])),
-            ...(edgeWeightMetadata ? {[edgeWeightColName]: edgeWeightCol.values} : {})
-        });
-
-        var dataSet = new GraphistryDataSet();
-        //dataSet.AddFile(nodeFile);
-        dataSet.AddFile(edgeFile);
-        dataSet.AddBindings({
-            "node_encodings": {
-                "bindings": {
-                    "node":"n"
-                }
-            },
-            "edge_encodings": {
-                "bindings": {
-                    "source": srcColName,
-                    "destination": dstColName,
-                    ...(edgeWeightMetadata ? { "edge_weight": edgeWeightCol.values } : {})
-                }
-            },
-            "metadata": {},
-            "name": "testdata"
-        })
-        this.rootElement.append("Created local schema, now uploading...");
-        dataSet.GetGraphUrl()
+        this.uploadDataset(view)
             .then(datasetID => {
                 console.debug('update deferred has id', { datasetID });
                 this.updateIframe(datasetID);
                 console.debug('////update fresh ID, stop');
-            });
-        
-
-
-        // this.service.SetNodes({
-        //     "n":["a","b","c"],
-        //     "v":[2,4,6],
-        //     "v2":["a","aa","aaa"]
-        // });
-        // this.service.SetEdges({
-        //     "s":["a","b","c"],
-        //     "d":["b","c","a"],
-        //     "txt":["the","quick","brown"],
-        //     "num":[2,4,6]
-        // });
-        // this.service.SetDataSetConfig({
-        //     "node_encodings": {
-        //         "bindings": {
-        //             "node":"n"
-        //         }
-        //     },
-        //     "edge_encodings": {
-        //         "bindings": {
-        //             "source": "s",
-        //             "destination": "d"
-        //         }
-        //     },
-        //     "metadata": {},
-        //     "name": "testdata"
-        // });
-
-        //var url= this.service.GetDataSetFrameUrl();       
-
+            });  
     }
 
 
-    private GetGraphistryBaseUrl():string
-    {
+    private getGraphistryBaseUrl():string {
         return "https://"+this.visualSettings.graphistrySetting.graphistryBaseUrl;
     }
 

@@ -16,7 +16,7 @@ RUN --mount=type=cache,target=/usr/src/app/.npm \
     && npm install
 
 COPY \
-    capabilities.json pbiviz.json TestDataModel.pbix tsconfig.json \
+    capabilities.json pbiviz.json TestDataModel.pbix tsconfig.json tslint.json \
     /opt/graphbi/pbiviz/
 COPY assets/ /opt/graphbi/pbiviz/assets/
 COPY src/ /opt/graphbi/pbiviz/src/
@@ -25,7 +25,6 @@ COPY style/ /opt/graphbi/pbiviz/style/
 FROM base as base-test
 WORKDIR /opt/graphbi/pbiviz
 
-COPY tslint.json /opt/graphbi/pbiviz/
 RUN --mount=type=cache,target=/usr/src/app/.npm \
     npm run lint \
     npm run test
