@@ -38,6 +38,8 @@ export class Visual implements IVisual {
         this.locale = options.host.locale;
         this.client = new GraphistryClient();
         this.rootElement = $(options.element);
+        this.rootElement.append("<h2>Graphistry Visual: First set fields Source and Destination</h2>");
+
         this.visualSettings = VisualSettings.getDefault() as VisualSettings;
         console.debug('////constructed');
     }
@@ -94,15 +96,17 @@ export class Visual implements IVisual {
     private notReadyIframe() {
         console.debug('Visual::notReadyIframe()', {config});
         this.rootElement.empty();
-        this.rootElement.append("<h2>Graphistry Visual: Finish account configuration:</h2>");
+        this.rootElement.append("<h1>Graphistry for PowerBI Custom Visual</h1>");
+        this.rootElement.append("<h2>Finish account configuration in <code>Format panel: Graphistry Settings</code></h2>");
+        const ul = this.rootElement.append("<ul></ul>");
         if (config.UrlBase === "") {
-            this.rootElement.append("<p>Format.GraphistrySettings.GraphistryServer: undefined</p>");
+            ul.append("<li>Format.GraphistrySettings.GraphistryServer: undefined</li>");
         }
         if (config.UserName === "") {
-            this.rootElement.append("<p>Format.GraphistrySettings.GraphistryUserName: undefined</p>");
+            ul.append("<li>Format.GraphistrySettings.GraphistryUserName: undefined</li>");
         }
         if (config.Password === "") {
-            this.rootElement.append("<p>Format.GraphistrySettings.GraphistryPassword: undefined</p>");
+            ul.append("<li>Format.GraphistrySettings.GraphistryPassword: undefined</li>");
         }
         console.debug('////Visual::notReadyIframe');
     }
@@ -110,7 +114,8 @@ export class Visual implements IVisual {
     private notReadySrcDstIframe(view) {
         console.debug('Visual::notReadySrcDstIframe()');
         this.rootElement.empty();
-        this.rootElement.append("<h2>Graphistry Visual: Finish edge bindings:</h2>");
+        this.rootElement.append("<h2>Graphistry for PowerBI Custom Visual</h2>");
+        this.rootElement.append("<h3>Finish edge bindings in <code>Fields panel</code></h3>");
         if (!view.metadata.columns.find(c => c.roles.Source)) {
             this.rootElement.append("<p>Fields.Source: undefined</p>");
         }
