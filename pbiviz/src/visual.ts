@@ -222,8 +222,9 @@ export class Visual implements IVisual {
         const dstColMetadata = view.metadata.columns.find(c => c.roles.Destination);
         const dstColName = dstColMetadata.queryName;  //TODO displaName?
         const dstCol = view.categorical.categories[dstColMetadata.index];
-        const edgePropertyMetadatas = view.metadata.columns.filter(c => c.roles.EdgeType);
+        const edgePropertyMetadatas = view.metadata.columns.filter(c => c.roles.EdgeProperty);
         const edgeWeightMetadata = view.metadata.columns.find(c => c.roles.EdgeWeight);
+        //categorical.values because measure?
         const edgeWeightCol = edgeWeightMetadata ? view.categorical.categories[edgeWeightMetadata.index] : undefined;
         const edgeWeightColName = edgeWeightMetadata ? edgeWeightMetadata.queryName : undefined;
         edgeFile.SetData({
