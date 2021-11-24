@@ -5,13 +5,13 @@
     "experimentalDecorators": true,
     "module": "es6",
     "target": "ES6",
-    "sourceMap": false,
+    "sourceMap": true,
     "outDir": "./.tmp/build/",
     "moduleResolution": "node",
     "declaration": true
   },
   "files": [
-    "src/barChart.ts",
+    "src/visual.ts",
     "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.d.ts"
   ]
 }

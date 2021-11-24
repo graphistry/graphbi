@@ -1,131 +1,139 @@
 {
-  "dataRoles": [
-    {
-        "displayNameKey": "Visual_Source",
-        "name": "Source",
-        "kind": "Grouping",
-        "displayName": "Source"
+    "dataRoles": [
+        {
+            "displayNameKey": "Visual_Source",
+            "name": "Source",
+            "kind": "Grouping",
+            "displayName": "Source"
+        },
+        {
+            "displayNameKey": "Visual_Destination",
+            "name": "Destination",
+            "kind": "Grouping",
+            "displayName": "Destination "
+        },
+        {
+            "displayNameKey": "Visual_EdgeWeight",
+            "name": "EdgeWeight",
+            "kind": "Measure",
+            "displayName": "Edge weight",
+            "requiredTypes": [
+                {"integer": true},
+                {"numeric": true}
+            ]
+        },
+        {
+            "displayNameKey": "Visual_SourceType",
+            "name": "SourceType",
+            "kind": "Grouping",
+            "displayName": "Source type"
+        },
+        {
+            "displayNameKey": "Visual_DestinationType",
+            "name": "Destination Type",
+            "kind": "Grouping",
+            "displayName": "Destination type"
+        },
+        {
+            "displayNameKey": "Visual_EdgeProperty",
+            "name": "EdgeProperty",
+            "kind": "Grouping",
+            "displayName": "Edge properties"
+        }
+    ],
+    "sorting": {
+        "default": {}
     },
-    {
-        "displayNameKey": "Visual_Destination",
-        "name": "Destination",
-        "kind": "Grouping",
-        "displayName": "Destination "
+    "drilldown": {
+        "roles": [
+            "Source",
+            "Target"
+        ]
     },
-    {
-        "displayNameKey": "Visual_Weight",
-        "name": "Weight",
-        "kind": "Measure",
-        "displayName": "Weight"
-    },
-    {
-        "displayNameKey": "Visual_SourceType",
-        "name": "SourceType",
-        "kind": "Grouping",
-        "displayName": "Source Type"
-    },
-    {
-        "displayNameKey": "Visual_DestinationType",
-        "name": "Destination Type",
-        "kind": "Grouping",
-        "displayName": "Destination Type"
-    },
-    {
-      "displayNameKey": "Visual_EdgeType",
-      "name": "EdgeType",
-      "kind": "Grouping",
-      "displayName": "Edge Type"
-  }
-],
-"drilldown": {
-    "roles": [
-        "Source",
-        "Target"
-    ]
-},
-"dataViewMappings": [
-    {
-        "conditions": [
-            {
-                "Source": {
-                    "max": 1
+    "supportsLandingPage": true,
+    "supportsEmptyDataView": true,
+    "dataViewMappings": [
+        {
+            "conditions": [
+                {
+                    "Source": {
+                        "min": 1,
+                        "max": 1
+                    },
+                    "Destination": {
+                        "min": 1,
+                        "max": 1
+                    }
+                }
+            ],
+            "categorical": {
+                "categories": {
+                    "select": [
+                        {
+                            "for": {
+                                "in": "Source"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "Destination"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "EdgeProperty"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "SourceType"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "DestinationType"
+                            }
+                        }
+                    ]
                 },
-                "Destination": {
-                    "max": 1
+                "values": {
+                    "select": [
+                        {
+                            "bind": {
+                                "to": "EdgeWeight"
+                            }
+                        }
+                    ]
                 }
             }
-        ],
-        "categorical": {
-            "categories": {
-                "select": [
-                    {
-                        "for": {
-                            "in": "Source"
-                        }
-                    },
-                    {
-                        "for": {
-                            "in": "Destination"
-                        }
-                    },
-                    {
-                        "for": {
-                            "in": "EdgeType"
-                        }
-                    },
-                    {
-                        "for": {
-                            "in": "SourceType"
-                        }
-                    },
-                    {
-                        "for": {
-                            "in": "DestinationType"
-                        }
-                    }
-                ]
-            },
-            "values": {
-                "select": [
-                    {
-                        "bind": {
-                            "to": "Weight"
-                        }
-                    }
-                ]
+        }
+    ],
+    "advancedEditModeSupport": 1,
+    "objects": {
+        "graphistrySetting": {
+            "displayName": "Graphistry Settings",
+            "properties": {
+                "graphistryBaseUrl": {
+                    "displayName": "Graphistry Server",
+                    "description": "Domain like hub.graphistry.com",
+                    "type": { "text": true }
+                },
+                "graphistryUserName": {
+                    "displayName": "Graphistry Username",
+                    "description": "Username",
+                    "type": { "text": true }
+                },
+                "graphistryPassword": {
+                    "displayName": "Graphistry Password",
+                    "description": "Password",
+                    "type": { "text": true }
+                },
+                "graphistryDatasetOverride": {
+                    "displayName": "Dataset ID override",
+                    "description": "Show preexisting graph instead of generating",
+                    "type": { "text": true }
+                }
             }
         }
     }
-],
-  "objects": {
-    "GraphistrySetting": {
-      "displayName": "Graphistry Setting",
-      "properties": {
-        "graphistryBaseUrl": {
-          "displayName": "Graphistry Server",
-          "type": {
-            "text": true
-          }
-        },
-        "graphistryUserName": {
-          "displayName": "Graphistry Username",
-          "type": {
-            "text": true
-          }
-        },
-        "graphistryPassword": {
-          "displayName": "Graphistry Password",
-          "type": {
-            "text": true
-          }
-        },
-        "graphistryDataSetId": {
-          "displayName": "Graphistry DataSet Id",
-          "type": {
-            "text": true
-          }
-        }
-      }
-    }
-  }
 }

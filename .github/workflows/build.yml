@@ -1,13 +1,17 @@
-# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
-
-name: build
+name: "build"
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  schedule:
+    - cron: '20 13 * * 2'
+
+defaults:
+  run:
+    working-directory: ./pbiviz
 
 jobs:
   build:
@@ -16,7 +20,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x]
+        node-version: [17.x]
 
     steps:
     - uses: actions/checkout@v2
