@@ -23,6 +23,8 @@ import {GraphistryFile, GraphistryFileType} from "./services/GraphistryFile";
 import {config, GraphistryClient} from "./services/GraphistryClient";
 
 
+let linkNum = 0;
+
 export class Visual implements IVisual {
     private host: IVisualHost;
     private locale: string;
@@ -93,36 +95,6 @@ export class Visual implements IVisual {
 
     }
 
-    private notReadyIframe() {
-        console.debug('Visual::notReadyIframe()', {config});
-        this.rootElement.empty();
-        this.rootElement.append("<h1>Graphistry for PowerBI Custom Visual</h1>");
-        this.rootElement.append("<h2>Finish account configuration in <code>Format panel: Graphistry Settings</code></h2>");
-        const ul = this.rootElement.append("<ul></ul>");
-        if (config.UrlBase === "") {
-            ul.append("<li>Format.GraphistrySettings.GraphistryServer: undefined</li>");
-        }
-        if (config.UserName === "") {
-            ul.append("<li>Format.GraphistrySettings.GraphistryUserName: undefined</li>");
-        }
-        if (config.Password === "") {
-            ul.append("<li>Format.GraphistrySettings.GraphistryPassword: undefined</li>");
-        }
-        console.debug('////Visual::notReadyIframe');
-    }
-
-    private notReadySrcDstIframe(view) {
-        console.debug('Visual::notReadySrcDstIframe()');
-        this.rootElement.empty();
-        this.rootElement.append("<h2>Graphistry for PowerBI Custom Visual</h2>");
-        this.rootElement.append("<h3>Finish edge bindings in <code>Fields panel</code></h3>");
-        if (!view.metadata.columns.find(c => c.roles.Source)) {
-            this.rootElement.append("<p>Fields.Source: undefined</p>");
-        }
-        if (!view.metadata.columns.find(c => c.roles.Destination)) {
-            this.rootElement.append("<p>Fields.Destination: undefined</p>");
-        }
-    }
     private isReadySrcDstIframe(view) {
         console.debug('Visual::isReadySrcDstIframe()');
         const src = view.metadata.columns.find(c => c.roles.Source);
@@ -136,24 +108,41 @@ export class Visual implements IVisual {
         return true;
     }
 
+    private notReadyIframe(view) {
+        console.debug('Visual::notReadyIframe()', {config});
+        this.rootElement.empty();
+        this.rootElement.append("<h1>Graphistry for PowerBI Custom Visual</h1>");
+
+        let isConfigureAccountReady = true;
+        this.rootElement.append("<h2>1. Configure account in <code>Format panel: Graphistry Settings</code></h2>");
+        const ul = this.rootElement.append("<ul></ul>");
+        if (config.UrlBase === "") {
+            ul.append("<li>❌ <code>Format.GraphistrySettings.GraphistryServer</code>: undefined</li>");
+            isConfigureAccountReady = false;
+        }
+        if (config.UserName === "") {
+            ul.append("<li>❌ <code>Format.GraphistrySettings.GraphistryUserName</code>: undefined</li>");
+            isConfigureAccountReady = false;
+        }
+        if (config.Password === "") {
+            ul.append("<li>❌ <code>Format.GraphistrySettings.GraphistryPassword</code>: undefined</li>");
+            isConfigureAccountReady = false;
+        }
+        if (isConfigureAccountReady) {
+            this.rootElement.append("✔️ Done")
+        }
+
+        this.rootElement.append("<h2>2. Bind edge source/destination in <code>Fields panel</code></h3>");
+        if (!view.metadata.columns.find(c => c.roles.Source)) {
+            this.rootElement.append("<p>❌ <code>Fields.Source</code>: undefined</p>");
+        }
+        if (!view.metadata.columns.find(c => c.roles.Destination)) {
+            this.rootElement.append("<p>❌ <code>Fields.Destination</code>: undefined</p>");
+        }
+    }
+
+
     private updateIframe(datasetID: string) {
-
-        // if(this.visualSettings.GraphistrySetting.graphistryDataSetId != "")
-        // {
-        //     var dataSetFrameUrl= this.getGraphistryBaseUrl()+"/graph/graph.html?dataset="+this.visualSettings.GraphistrySetting.graphistryDataSetId;
-
-        //     var frame=$('<iframe />', {
-        //         name: 'frame1',
-        //         id: 'frame1',
-        //         src: dataSetFrameUrl,
-
-        //     });
-        //     this.rootElement.append(frame)
-        // }
-        // else
-        // {
-        //     this.rootElement.append("<p><span style='color: #ff0000;'>Data Set Id is invalid. </span></p><p><span style='color: #ff0000;'>Please enter a valid Data Set Id</span></p>")
-        // }
 
         console.debug('Visual::updateIframeOverride()', {datasetID});
         this.rootElement.empty();
@@ -170,15 +159,25 @@ export class Visual implements IVisual {
             //id: 'frame1',
             src: iframeUrl,
         });
-        this.rootElement.append(frame)
-        this.rootElement.append("<h3>Open in a <a href=\"" + linkUrl + "\">new tab: " + datasetID + "</a></h3>");
+        this.rootElement.append(frame);
+        linkNum++;
+        const linkID = "vizlink-" + linkNum;
+        this.rootElement
+            .append(
+                "<h3>Open in a <a id=\"" + linkID + "\" href=\"" + iframeUrl+ "\">new tab: " + iframeUrl + "</a></h3>")
+            .on('click', '#' + linkID, (e) => {
+                console.debug('Visual::updateIframeOverride() link click', {e});
+                e.preventDefault();
+                this.host.launchUrl(iframeUrl);
+            });
         console.debug('////Visual::updateIframeOverride');
     }
 
-    private uploadDataset(view) {
-
-        this.rootElement.empty();
-        this.rootElement.append("<h2>Graphistry Visual: Uploading data...</h2>");
+    private prevValues = {};
+    private prevFiles = {edgeFile: null, nodeFile: null};
+    private prevBindings = null;
+    private previousRendered = false;
+    private uploadDatasetAndRender(view) {
 
         /*
         var nodeFile = new GraphistryFile(GraphistryFileType.Node);
@@ -188,8 +187,7 @@ export class Visual implements IVisual {
             "v2":["a","aa","aaa"]
         });
         */
-        var edgeFile = new GraphistryFile(GraphistryFileType.Edge);
-
+        
         const srcColMetadata = view.metadata.columns.find(c => c.roles.Source);
         const srcColName = srcColMetadata.queryName;
         const srcCol = view.categorical.categories[srcColMetadata.index];
@@ -201,17 +199,29 @@ export class Visual implements IVisual {
         //categorical.values because measure?
         const edgeWeightCol = edgeWeightMetadata ? view.categorical.categories[edgeWeightMetadata.index] : undefined;
         const edgeWeightColName = edgeWeightMetadata ? edgeWeightMetadata.queryName : undefined;
-        edgeFile.setData({
+
+        //upload edge values if new, else reuse edge file
+        const edgeFileColumnValues = {
             [srcColName]: srcCol.values,
             [dstColName]: dstCol.values,
             ...Object.fromEntries(edgePropertyMetadatas.map(c => [c.queryName, view.categorical.categories[c.index].values])),
             ...(edgeWeightMetadata ? {[edgeWeightColName]: edgeWeightCol.values} : {})
-        });
+        };
+        const edgeValuesAllSame = 
+            Object.keys(edgeFileColumnValues)
+                .map(colName => this.prevValues[colName] === edgeFileColumnValues[colName])
+                .every(check => check);
+        let edgeFile = this.prevFiles.edgeFile;
+        const isReusedEdgeFile = edgeFile && edgeValuesAllSame;
+        console.debug('duplicate isReusedEdgeFile', isReusedEdgeFile)
+        if (!isReusedEdgeFile) {
+            edgeFile = new GraphistryFile(GraphistryFileType.Edge);
+            edgeFile.setData(edgeFileColumnValues);
+            this.prevFiles.edgeFile = edgeFile;
+            Object.assign(this.prevValues, edgeFileColumnValues);
+        }
 
-        var dataSet = new GraphistryDataSet();
-        //dataSet.addFile(nodeFile);
-        dataSet.addFile(edgeFile);
-        dataSet.addBindings({
+        const bindings = {
             "node_encodings": {
                 "bindings": {
                     "node":"n"
@@ -221,14 +231,42 @@ export class Visual implements IVisual {
                 "bindings": {
                     "source": srcColName,
                     "destination": dstColName,
-                    ...(edgeWeightMetadata ? { "edge_weight": edgeWeightCol.values } : {})
+                    ...(edgeWeightMetadata ? { "edge_weight": edgeWeightColName } : {})
                 }
             },
             "metadata": {},
             "name": "testdata"
-        })
+        };
+        const isReusedBindings = JSON.stringify(bindings) === JSON.stringify(this.prevBindings);
+        console.debug('duplicate isReusedBindings', isReusedBindings, {bindings, prev: this.prevBindings});
+
+        // //////////////////////////////////////////////////////////////////////////////
+
+        if (this.previousRendered && isReusedEdgeFile && isReusedBindings) {
+            console.debug('no change, reuse iframe');
+            return;
+        } else {
+            this.prevBindings = bindings;
+        }
+
+        // //////////////////////////////////////////////////////////////////////////////
+
+        this.rootElement.empty();
+        this.rootElement.append("<h2>Graphistry Visual: Uploading data...</h2>");    
+
+        var dataset = new GraphistryDataSet();
+        //dataSet.addFile(nodeFile);
+        dataset.addFile(edgeFile);
+        dataset.addBindings(bindings);
+
         this.rootElement.append("Created local schema, now uploading...");
-        return dataSet.getGraphUrl();
+        this.previousRendered = true;
+        return dataset.getGraphUrl()
+            .then(datasetID => {
+                console.debug('update deferred has id', { datasetID });
+                this.updateIframe(datasetID);
+                console.debug('////update fresh ID, stop');
+            });
     }
 
     public update(options: VisualUpdateOptions, viewModel) {
@@ -241,33 +279,24 @@ export class Visual implements IVisual {
         config.Password = this.visualSettings.graphistrySetting.graphistryPassword;
         config.DatasetOverride = this.visualSettings.graphistrySetting.graphistryDatasetOverride;
 
-        if (config.DatasetOverride) {
+        if (config.DatasetOverride && config.UrlBase) {
             console.debug('as DatasetOverride', {datasetOverride: config.DatasetOverride});
             this.updateIframe(config.DatasetOverride);
+            this.previousRendered = false;
             console.debug('////update has DatasetOverride, stop');
             return;
         }
 
-        if (!this.client.readyForUpload()) {
-            console.debug('////update not readyForUpload, stop');
-            this.notReadyIframe();
-            return;
-        }
-
-        if (!this.isReadySrcDstIframe(view)) {
-            console.debug('////update not readySrcDstIframe, stop');
-            this.notReadySrcDstIframe(view);
+        console.debug('Visual::isReadyForUpload()', {visualSettings: this.visualSettings});
+        if (!this.client.isServerConfigured() || !this.isReadySrcDstIframe(view)) {
+            this.notReadyIframe(view);
+            this.previousRendered = false;
+            console.debug('////update not ready for upload, stop');
             return;
         }
         
         console.debug('update readyForUpload, continue');
-
-        this.uploadDataset(view)
-            .then(datasetID => {
-                console.debug('update deferred has id', { datasetID });
-                this.updateIframe(datasetID);
-                console.debug('////update fresh ID, stop');
-            });  
+        this.uploadDatasetAndRender(view);
     }
 
 

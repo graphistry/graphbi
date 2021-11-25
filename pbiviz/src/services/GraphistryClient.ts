@@ -18,7 +18,7 @@ export { config }; // tslint:disable-line
 
 export class GraphistryClient {
 
-    public readyForUpload():boolean {
+    public isServerConfigured():boolean {
         return config.UserName !== "" && config.Password !== "" && config.UrlBase !== "";
     }
 
