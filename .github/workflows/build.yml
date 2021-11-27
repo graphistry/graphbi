@@ -18,18 +18,17 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [17.x]
-
     steps:
     - uses: actions/checkout@v2
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm ci
-    - run: npm run lint
-    - run: npm test
-      env:
-        CI: true
+    - name: build
+      run: ./dc.sh build pbi
+    - name: lint
+      run: ./bin/lint.sh
+    - name: test
+      run: ./bin/test.sh
+    - name: bundle
+      run: ./bin/package.sh
