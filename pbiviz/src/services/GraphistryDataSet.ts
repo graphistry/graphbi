@@ -1,54 +1,59 @@
-import {GraphistryClient} from "./GraphistryClient"
-import {GraphistryFile, GraphistryFileType} from "./GraphistryFile";
-export class GraphistryDataSet
-{
-   
-    
-    //private _files:GraphistryFile[];
-    private _nodeFiles:GraphistryFile[];
-    private _edgeFiles:GraphistryFile[];
-    private _bindings:Object;
-    private _datasetID:string;
+import { GraphistryClient } from './GraphistryClient';
+import { GraphistryFile, GraphistryFileType } from './GraphistryFile';
 
+export class GraphistryDataset {
+    // private _files:GraphistryFile[];
 
-    private _graphistryClient:GraphistryClient;
-    constructor()
-    {
-        this._graphistryClient= new GraphistryClient();
+    private _nodeFiles: GraphistryFile[];
+
+    private _edgeFiles: GraphistryFile[];
+
+    private _bindings: Record<string, unknown>;
+
+    private _datasetID: string;
+
+    private _graphistryClient: GraphistryClient;
+
+    constructor() {
+        this._graphistryClient = new GraphistryClient();
         this._nodeFiles = [];
         this._edgeFiles = [];
     }
 
-    public getGraphUrl():Promise<string> {
+    public getGraphUrl(): Promise<string> {
         const uploadedFiles = Promise.all(
-            (this._nodeFiles.concat(this._edgeFiles)).map((file)=>{
-                return file.createFile()
-                    .then((response)=>{ 
+            this._nodeFiles.concat(this._edgeFiles).map((file) =>
+                file
+                    .createFile()
+                    .then((response) => {
                         if (response) {
                             return file.uploadData();
                         }
-                        throw new Error("File creation failed 1");
+                        throw new Error('File creation failed 1');
                     })
-                    .then((ok)=>{
+                    .then((ok) => {
                         if (!ok) {
-                            throw new Error("File upload failed 2");
+                            throw new Error('File upload failed 2');
                         }
                         return file;
-                    })
-            }));
-        return uploadedFiles.then((files)=>{
-            console.debug("Uploaded Files", files);
-            return files;
-        }).then(() => {
-            const fileBindings = {
-                node_files: this._nodeFiles.map((file)=> file.fileID ),
-                edge_files: this._edgeFiles.map((file)=> file.fileID )
-            }
-            const bindings = {...fileBindings, ...this._bindings};
-            console.debug("combined Bindings", bindings);
+                    }),
+            ),
+        );
+        return uploadedFiles
+            .then((files) => {
+                console.debug('Uploaded Files', files);
+                return files;
+            })
+            .then(() => {
+                const fileBindings = {
+                    node_files: this._nodeFiles.map((file) => file.fileID),
+                    edge_files: this._edgeFiles.map((file) => file.fileID),
+                };
+                const bindings = { ...fileBindings, ...this._bindings };
+                console.debug('combined Bindings', bindings);
 
-            return this.createDataSet(bindings);
-            /*
+                return this.createDataSet(bindings);
+                /*
             return this._graphistryClient.post("api/v2/files/",{
                 file_type:this.FileType
             }).then((fileJsonResults)=>{
@@ -58,21 +63,20 @@ export class GraphistryDataSet
             })
             return "ok"
             */
-        })
+            });
     }
 
-    public createDataSet(data:Object):Promise<string> {
-        return this._graphistryClient.post("api/v2/upload/datasets/",data)
-        .then((dataJsonResults)=>{
-            console.debug("DataSet Created", dataJsonResults);
+    public createDataSet(data: Record<string, unknown>): Promise<string> {
+        return this._graphistryClient.post('api/v2/upload/datasets/', data).then((dataJsonResults) => {
+            console.debug('DataSet Created', dataJsonResults);
             this._datasetID = dataJsonResults.data.dataset_id;
-            //this._fileId=fileJsonResults.file_id;
-            //this._fileCreated=true;
+            // this._fileId=fileJsonResults.file_id;
+            // this._fileCreated=true;
             return this._datasetID;
-        })
+        });
     }
 
-    public addBindings(bindings: Object): void {
+    public addBindings(bindings: Record<string, unknown>): void {
         this._bindings = bindings;
     }
 
@@ -82,7 +86,7 @@ export class GraphistryDataSet
         } else if (file.Type === GraphistryFileType.Edge) {
             this._edgeFiles.push(file);
         } else {
-            throw new Error("Invalid File Type");
+            throw new Error('Invalid File Type');
         }
     }
 }

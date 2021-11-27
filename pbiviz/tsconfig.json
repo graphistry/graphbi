@@ -10,8 +10,5 @@
     "moduleResolution": "node",
     "declaration": true
   },
-  "files": [
-    "src/visual.ts",
-    "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.d.ts"
-  ]
+  "include": ["src/**/*"]
 }

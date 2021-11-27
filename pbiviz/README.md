@@ -19,6 +19,20 @@ In host: `npm i --package-lock-only`
 
 (TODO: as docker cmd)
 
+### Prettier transform
+
+In host (else have to volume mount `src/`):
+
+```bash
+npm i
+npm run prettier
+```
+
+And to apply:
+
+```bash
+npm run prettier:fix
+```
 
 ### Setting Up Development Environment
 
