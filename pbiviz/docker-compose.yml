@@ -43,6 +43,8 @@ services:
     command:
       - ./node_modules/.bin/pbiviz
       - start
+    volumes:
+      - ${CERTS_PATH}:/opt/graphbi/pbiviz/node_modules/powerbi-visuals-tools/certs:ro
     ports:
       - "8080:8080"
 
