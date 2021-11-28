@@ -24,7 +24,7 @@ export class GraphistryClient {
     public post(Uri: string, Payload: any): Promise<any> {
         console.debug('@post', { Uri, Payload });
 
-        const headers = this.getBaseHeaders();
+        const headers = <Record<string, string>>this.getBaseHeaders();
         return this.getAuthToken().then((response) => {
             headers.Authorization = `Bearer ${response}`;
             return this.postToApi(Uri, Payload, headers);

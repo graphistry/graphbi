@@ -205,7 +205,9 @@ export class Visual implements IVisual {
             .map((colName) => this.prevValues[colName] === edgeFileColumnValues[colName])
             .every((check) => check);
         // eslint-disable-next-line prettier/prettier
-        let { prevFiles: { edgeFile } } = this;
+        let {
+            prevFiles: { edgeFile },
+        } = this;
         const isReusedEdgeFile = edgeFile && edgeValuesAllSame;
         console.debug('duplicate isReusedEdgeFile', isReusedEdgeFile);
         if (!isReusedEdgeFile) {
@@ -265,6 +267,10 @@ export class Visual implements IVisual {
 
     public update(options: VisualUpdateOptions, viewModel) {
         console.debug('Visual::update()', { options, viewModel });
+        if (!options || !options.dataViews || !options.dataViews[0]) {
+            console.debug('Visual::update() no dataViews', { options });
+            return;
+        }
         const view = options.dataViews[0];
         this.createViewModel(view);
 

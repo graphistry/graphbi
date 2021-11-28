@@ -1,4 +1,10 @@
-import { DataViewObject, DataViewObjects, DataViewCategoryColumn } from 'powerbi-visuals-api';
+// Fails `npm run test`:
+// import { DataViewObject, DataViewObjects, DataViewCategoryColumn } from 'powerbi-visuals-api';
+import powerbiVisualsApi from 'powerbi-visuals-api';
+import powerbi = powerbiVisualsApi;
+import DataViewObject = powerbi.DataViewObject;
+import DataViewObjects = powerbi.DataViewObjects;
+import DataViewCategoryColumn = powerbi.DataViewCategoryColumn;
 
 /**
  * Gets property value for a particular object.

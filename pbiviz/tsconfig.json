@@ -10,5 +10,13 @@
     "moduleResolution": "node",
     "declaration": true
   },
-  "include": ["src/**/*"]
+  "files": [
+    "src/Visual.ts",
+    "src/localization/Localization.ts",
+    "src/localization/localizationHelper.ts",
+    "src/localization/localizedResources.ts",
+    "src/GraphistrySetting.ts",
+    "src/objectEnumerationUtility.ts",
+    "src/VisualSettings.ts"
+  ]
 }
