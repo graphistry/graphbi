@@ -22,6 +22,8 @@ jobs:
       PBI_TEST_PUBLIC_CERTIFICATE: ${{ secrets.PBI_TEST_PUBLIC_CERTIFICATE }}
       PBI_TEST_PRIVATE_KEY: ${{ secrets.PBI_TEST_PRIVATE_KEY }}
       CERTS_PATH: ./certs
+      DOCKER_BUILDKIT: 1
+      COMPOSE_DOCKER_CLI_BUILD: 1
 
     steps:
     - uses: actions/checkout@v2
