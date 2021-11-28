@@ -31,4 +31,13 @@ jobs:
     - name: test
       run: ./bin/test.sh
     - name: bundle
-      run: ./bin/package.sh
+      env:
+        PBI_TEST_PUBLIC_CERTIFICATE: ${{ secrets.PBI_TEST_PUBLIC_CERTIFICATE }}
+        PBI_TEST_PRIVATE_KEY: ${{ secrets.PBI_TEST_PRIVATE_KEY }}
+        CERTS_PATH: ./certs
+      run: |
+        mkdir -p certs
+        echo "${PBI_TEST_PUBLIC_CERTIFICATE}" > certs/PowerBICustomVisualTest_public.crt
+        echo "${PBI_TEST_PRIVATE_KEY}" > certs/PowerBICustomVisualTest_private.key
+        touch certs/blank
+        ./bin/package.sh
