@@ -46,11 +46,18 @@ services:
     ports:
       - "8080:8080"
     volumes:
+      # ### EDITING
+      - ${PWD}/package.json:/opt/graphbi/pbiviz/package.json
+      - ${PWD}/package-lock.json:/opt/graphbi/pbiviz/package-lock.json
+      # ### READ-ONLY
       - ${CERTS_PATH}:/opt/graphbi/pbiviz/node_modules/powerbi-visuals-tools/certs:ro
+      - ${PWD}/.eslintrc.json:/opt/graphbi/pbiviz/.eslintrc.json:ro
+      - ${PWD}/.prettierrc:/opt/graphbi/pbiviz/.prettierrc:ro
       - ${PWD}/capabilities.json:/opt/graphbi/pbiviz/capabilities.json:ro
       - ${PWD}/pbiviz.json:/opt/graphbi/pbiviz/pbiviz.json:ro
-      - ${PWD}/tsconfig.json:/opt/graphbi/pbiviz/tsconfig.json:ro
       - ${PWD}/src:/opt/graphbi/pbiviz/src:ro
+      - ${PWD}/tsconfig.json:/opt/graphbi/pbiviz/tsconfig.json:ro
+      - ${PWD}/tslint.json:/opt/graphbi/pbiviz/tslint.json:ro
     #healthcheck:
     #  test: ["CMD", "curl", "-k", "--fail", "--silent", "--output", "/dev/null", "--head", "--write-out", "%{http_code}", "https://localhost:8080/assets/status"]
     #  interval: 1m30s

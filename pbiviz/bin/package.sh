@@ -8,8 +8,8 @@ APP_BUILD_TAG=`cat VERSION`
 
 mkdir -p dist
 docker run \
-    --rm -it \
+    --rm \
     -v "$(pwd)/dist:/opt/graphbi/pbiviz/dist" \
     --entrypoint=/bin/bash \
     graphistry/pbi:${APP_BUILD_TAG} \
-    -c "npm run package && ls dist"
+    -c "npm run package --verbose && ls dist"

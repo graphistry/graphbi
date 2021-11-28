@@ -1,5 +1,6 @@
 FROM node:16.13.0-slim as base
 WORKDIR /opt/graphbi/pbiviz
+RUN npm config set fund false
 
 RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt  \
     apt-get update \
@@ -16,18 +17,10 @@ RUN --mount=type=cache,target=/usr/src/app/.npm \
     && npm install
 
 COPY \
-    capabilities.json pbiviz.json TestDataModel.pbix tsconfig.json tslint.json \
+    .eslintrc.json .prettierrc \
+    tsconfig.json tslint.json \
+    capabilities.json pbiviz.json TestDataModel.pbix \
     /opt/graphbi/pbiviz/
 COPY assets/ /opt/graphbi/pbiviz/assets/
 COPY src/ /opt/graphbi/pbiviz/src/
 COPY style/ /opt/graphbi/pbiviz/style/ 
-
-FROM base as base-test
-WORKDIR /opt/graphbi/pbiviz
-
-RUN --mount=type=cache,target=/usr/src/app/.npm \
-    npm run lint \
-    npm run test
-
-FROM base as component
-WORKDIR /opt/graphbi/pbiviz

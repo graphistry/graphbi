@@ -1,27 +1,46 @@
 {
-    "name": "visual",
+    "name": "@graphistry/graphbi",
     "version": "0.1.0",
     "scripts": {
-        "pbiviz": "pbiviz",
-        "start": "pbiviz start",
+        "eslint": "eslint 'src/**/*.ts'",
+        "eslint:fix": "eslint --fix 'src/**/*.ts'",
+        "lint": "npm run eslint && npm run tslint",
         "package": "pbiviz package",
-        "lint": "tslint -r \"node_modules/tslint-microsoft-contrib\"  \"+(src|test)/**/*.ts\"",
-        "test": "pbiviz package --resources --no-minify --no-pbiviz"
+        "pbiviz": "pbiviz",
+        "prettier": "prettier 'src/**/*.ts'",
+        "prettier:fix": "prettier --write 'src/**/*.ts'",
+        "start": "pbiviz start",
+        "test": "pbiviz package --resources --no-minify --no-pbiviz",
+        "tslint": "tslint -r \"node_modules/tslint-microsoft-contrib\"  \"+(src|test)/**/*.ts\"",
+        "tslint-check": "tslint-config-prettier-check ./tslint.json"
     },
     "dependencies": {
         "@types/jquery": "^3.5.8",
-        "jquery": "^3.6.0",
-        "regenerator-runtime": "^0.13.9",
-        "uuid": "^7.0.2"
+        "@types/react": "^17.0.37",
+        "@types/react-dom": "^17.0.11",
+        "jquery": "3.6.0",
+        "powerbi-visuals-api": "~3.8.0",
+        "powerbi-visuals-utils-dataviewutils": "2.4.1",
+        "react": "17.0.2",
+        "react-dom": "17.0.2",
+        "regenerator-runtime": "0.13.9",
+        "uuid": "8.3.2"
     },
     "devDependencies": {
-        "powerbi-visuals-api": "^3.8.3",
-        "powerbi-visuals-tools": "^3.3.2",
-        "powerbi-visuals-utils-dataviewutils": "^2.4.1",
-        "powerbi-visuals-utils-formattingutils": "^4.7.1",
-        "powerbi-visuals-utils-interactivityutils": "^5.7.1",
-        "powerbi-visuals-utils-tooltiputils": "^2.5.2",
+        "@typescript-eslint/eslint-plugin": "5.4.0",
+        "@typescript-eslint/parser": "5.4.0",
+        "eslint": "8.3.0",
+        "eslint-config-airbnb": "19.0.1",
+        "eslint-config-airbnb-typescript": "^16.0.0",
+        "eslint-config-prettier": "8.3.0",
+        "eslint-plugin-prettier": "4.0.0",
+        "powerbi-visuals-tools": "3.3.2",
+        "powerbi-visuals-utils-formattingutils": "4.7.1",
+        "powerbi-visuals-utils-interactivityutils": "5.7.1",
+        "powerbi-visuals-utils-tooltiputils": "2.5.2",
+        "prettier": "2.5.0",
         "tslint": "^5.20.1",
+        "tslint-config-prettier": "^1.18.0",
         "tslint-microsoft-contrib": "^6.2.0"
     }
 }

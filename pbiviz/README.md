@@ -1,6 +1,4 @@
-# PowerBI-visuals-sampleBarChart
-[![Build Status](https://travis-ci.org/Microsoft/PowerBI-visuals-samplebarchart.svg?branch=master)](https://travis-ci.org/Microsoft/PowerBI-visuals-samplebarchart)
-Bar Chart Custom Visual sample.
+# Graphistry for PowerBI
 
 ## Bundle
 
@@ -19,6 +17,20 @@ In host: `npm i --package-lock-only`
 
 (TODO: as docker cmd)
 
+### Prettier transform
+
+In host (else have to volume mount `src/`):
+
+```bash
+npm i
+npm run prettier
+```
+
+And to apply:
+
+```bash
+npm run prettier:fix
+```
 
 ### Setting Up Development Environment
 
