@@ -6,7 +6,6 @@
 
 APP_BUILD_TAG=`cat VERSION`
 
-mkdir -p dist
 docker run \
     --rm -it \
     --entrypoint=/bin/bash \
