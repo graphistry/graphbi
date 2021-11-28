@@ -15,6 +15,9 @@
     "src/localization/Localization.ts",
     "src/localization/localizationHelper.ts",
     "src/localization/localizedResources.ts",
+    "src/services/GraphistryClient.ts",
+    "src/services/GraphistryDataset.ts",
+    "src/services/GraphistryFile.ts",
     "src/GraphistrySetting.ts",
     "src/objectEnumerationUtility.ts",
     "src/VisualSettings.ts"
