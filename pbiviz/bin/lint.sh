@@ -7,7 +7,7 @@
 APP_BUILD_TAG=`cat VERSION`
 
 docker run \
-    --rm -it \
+    --rm \
     --entrypoint=/bin/bash \
     graphistry/pbi:${APP_BUILD_TAG} \
     -c "npm run lint"
