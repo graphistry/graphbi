@@ -168,7 +168,7 @@ export class Visual implements IVisual {
             ...(edgeWeightMetadata ? { [edgeWeightColName]: edgeWeightCol.values } : {}),
         };
         edgePropertyMetadatas.forEach(c => {
-            edgeFileColumnValues[c] = [c.queryName, view.categorical.categories[c.index].values];
+            edgeFileColumnValues[c.queryName] = view.categorical.categories[c.index].values;
         });
 
         const edgeValuesAllSame = Object.keys(edgeFileColumnValues)
