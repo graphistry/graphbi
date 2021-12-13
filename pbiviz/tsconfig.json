@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
-    "allowJs": false,
+    "allowJs": true,
+    "checkJs": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "module": "es6",
@@ -8,7 +9,11 @@
     "sourceMap": true,
     "outDir": "./.tmp/build/",
     "moduleResolution": "node",
-    "declaration": true
+    "declaration": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "types": ["jquery", "react", "react-dom"],
+    "lib": ["es2015", "dom"]
   },
   "files": [
     "src/Visual.ts",

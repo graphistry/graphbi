@@ -4,10 +4,11 @@
         "plugin:@typescript-eslint/recommended",
         "airbnb",
         "airbnb-typescript",
+        "plugin:react/recommended",
         "prettier"
     ],
     "parser": "@typescript-eslint/parser",
-    "plugins": ["@typescript-eslint", "prettier"],
+    "plugins": ["@typescript-eslint", "prettier", "react-hooks"],
     "rules": {
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-inferrable-types": "off",
@@ -17,7 +18,10 @@
         "import/prefer-default-export": "off",
         "no-console": "off",
         "no-underscore-dangle": "off",
-        "prettier/prettier": "error"
+        "prettier/prettier": "error",
+        "react-hooks/rules-of-hooks": "error",
+        "react-hooks/exhaustive-deps": "warn",
+        "react/prop-types": "off"
     },
     "env": {
         "browser": true
@@ -25,5 +29,11 @@
     "parserOptions": {
         "sourceType": "module",
         "project": "./tsconfig.json"
+    },
+    "settings": {
+        "react": {
+            "pragma": "React",
+            "version": "detect"
+        }
     }
 }
