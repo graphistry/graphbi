@@ -17,6 +17,10 @@ In host: `npm i --package-lock-only`
 
 (TODO: as docker cmd)
 
+### GraphistryJS
+
+Switch dependency in `package.json`: `file:/some-folder/graphistry-js/projects/client-api-react` (or `npm link`)
+
 ### Prettier transform
 
 In host (else have to volume mount `src/`):
@@ -66,6 +70,12 @@ Create PowerBI dev account:
 ```bash
 ./dc.dev.sh build  # docker compose -f docker-compose.dev.yml build
 ./dc.dev.sh up     # docker compose -f docker-compose.dev.yml up
+```
+
+or
+
+```bash
+NODE_ENV=development ./node_modules/.bin/pbiviz start
 ```
 
 TLS-protected URL `https://localhost:8080/assets/status` should now work
