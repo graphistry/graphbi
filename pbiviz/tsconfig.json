@@ -24,7 +24,11 @@
     "src/services/GraphistryDataset.ts",
     "src/services/GraphistryFile.ts",
     "src/GraphistrySetting.ts",
+    "src/LoadState.ts",
     "src/objectEnumerationUtility.ts",
+    "src/components/Graphistry.tsx",
+    "src/components/Loader.tsx",
+    "src/components/Main.tsx",
     "src/VisualSettings.ts"
   ]
 }

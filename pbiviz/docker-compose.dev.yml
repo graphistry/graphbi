@@ -53,6 +53,7 @@ services:
       - ${CERTS_PATH}:/opt/graphbi/pbiviz/node_modules/powerbi-visuals-tools/certs:ro
       - ${PWD}/.eslintrc.json:/opt/graphbi/pbiviz/.eslintrc.json:ro
       - ${PWD}/.prettierrc:/opt/graphbi/pbiviz/.prettierrc:ro
+      - ${PWD}/assets:/opt/graphbi/pbiviz/assets:ro
       - ${PWD}/capabilities.json:/opt/graphbi/pbiviz/capabilities.json:ro
       - ${PWD}/pbiviz.json:/opt/graphbi/pbiviz/pbiviz.json:ro
       - ${PWD}/src:/opt/graphbi/pbiviz/src:ro
