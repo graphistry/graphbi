@@ -23,16 +23,16 @@
             ]
         },
         {
-            "displayNameKey": "Visual_SourceType",
-            "name": "SourceType",
+            "displayNameKey": "Visual_SourceProperty",
+            "name": "SourceProperty",
             "kind": "Grouping",
-            "displayName": "Source type"
+            "displayName": "Source node properties (not implemented)"
         },
         {
-            "displayNameKey": "Visual_DestinationType",
-            "name": "Destination Type",
+            "displayNameKey": "Visual_DestinationProperty",
+            "name": "Destination Property",
             "kind": "Grouping",
-            "displayName": "Destination type"
+            "displayName": "Destination node properties (ont implemented)"
         },
         {
             "displayNameKey": "Visual_EdgeProperty",
@@ -86,12 +86,12 @@
                         },
                         {
                             "for": {
-                                "in": "SourceType"
+                                "in": "SourceProperty"
                             }
                         },
                         {
                             "for": {
-                                "in": "DestinationType"
+                                "in": "DestinationProperty"
                             }
                         }
                     ]
