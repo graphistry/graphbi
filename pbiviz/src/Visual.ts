@@ -179,7 +179,29 @@ export class Visual implements IVisual {
         });
 
         const edgeValuesAllSame = Object.keys(edgeFileColumnValues)
-            .map((colName) => this.prevValues[colName] === edgeFileColumnValues[colName])
+            .map((colName) => {
+                if (this.prevValues[colName] === edgeFileColumnValues[colName]) {
+                    return true;
+                } else {
+                    console.debug('edge alias delta on prop', colName, this.prevValues[colName], edgeFileColumnValues[colName]);
+                    if (!this.prevValues || !this.prevValues[colName] || !edgeFileColumnValues[colName]) {
+                        console.debug('missing ref');
+                        return false;
+                    }
+                    if (this.prevValues[colName].length !== edgeFileColumnValues[colName].length) {
+                        console.debug('diff lengths', this.prevValues[colName].length, edgeFileColumnValues[colName].length);
+                        return false;
+                    }
+                    for (let i = 0; i < this.prevValues[colName].length; i++) {
+                        if (this.prevValues[colName][i] !== edgeFileColumnValues[colName][i]) {
+                            console.debug('delta on i', i, this.prevValues[colName][i], edgeFileColumnValues[colName][i]);
+                            return false;
+                        }
+                    }
+                    console.debug('some column values even if diff alias');
+                    return true;
+                }
+            })
             .every((check) => check);
         // eslint-disable-next-line prettier/prettier
         let {
@@ -367,7 +389,22 @@ export class Visual implements IVisual {
 
         // FIXME cancelation
         console.debug('update readyForUpload, continue');
-        const { uploading, uploaded } = this.uploadDataset(view);
+        const uploadDatasetResult = this.uploadDataset(view);
+        if (!uploadDatasetResult) {
+            console.debug('Rerendering with existing data but likely new config');
+            this.reactRoot = <React.ReactElement<any>>React.createElement(Main, {
+                host: this.host,
+                numNodes: this.numNodes,
+                numEdges: this.numEdges,
+                v: `updated uploaded: ${Date.now()}`,
+                view,
+                config,
+                datasetID: this.datasetID,
+                state: this.state,
+            });
+            ReactDOM.render(this.reactRoot, this.target);
+        }        
+        const { uploading, uploaded } = uploadDatasetResult;
         if (uploading) {
             this.state = LoadState.UPLOADING;
             this.reactRoot = <React.ReactElement<any>>React.createElement(Main, {
