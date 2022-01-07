@@ -111,7 +111,7 @@
     "advancedEditModeSupport": 1,
     "objects": {
         "graphistrySetting": {
-            "displayName": "Graphistry Settings",
+            "displayName": "Graphistry settings",
             "properties": {
                 "graphistryBaseUrl": {
                     "displayName": "Graphistry Server",
@@ -132,6 +132,246 @@
                     "displayName": "Dataset ID override",
                     "description": "Show preexisting graph instead of generating",
                     "type": { "text": true }
+                }
+            }
+        },
+        "chartLoadSetting": {
+            "displayName": "Chart Load",
+            "properties": {
+                "play": {
+                    "displayName": "Initial clustering duration",
+                    "description": "Seconds; empty for auto; 0 for no clustering",
+                    "type": { "numeric": true }
+                },
+                "showSplashScreen": {
+                    "displayName": "Show splash screen",
+                    "description": "Show splash screen",
+                    "type": { "bool": true }
+                }
+            }
+        },
+        "positionSetting": {
+            "displayName": "Position settings",
+            "properties": {
+                "positionX": {
+                    "displayName": "Initial x-axis position",
+                    "description": "Field name; empty for auto",
+                    "type": { "text": true }
+                },
+                "positionY": {
+                    "displayName": "Initial y-axis position",
+                    "description": "Field name; empty for auto",
+                    "type": { "text": true }
+                },
+                "lockedX": {
+                    "displayName": "Lock X position",
+                    "description": "No horizontal movement",
+                    "type": { "bool": true }
+                },
+                "lockedY": {
+                    "displayName": "Lock Y position",
+                    "description": "No vertical movement",
+                    "type": { "bool": true }
+                },
+                "lockedRadius": {
+                    "displayName": "Lock radius",
+                    "description": "Nodes move with constant distance from center",
+                    "type": { "bool": true }
+                }
+            }
+        },
+        "backgroundSetting": {
+            "displayName": "Background settings",
+            "properties": {
+                "color": {
+                    "displayName": "Background color",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "labelSetting": {
+            "displayName": "Label settings",
+            "properties": {
+                "background": {
+                    "displayName": "Label background",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "color": {
+                    "displayName": "Text color",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "opacity": {
+                    "displayName": "Label opacity",
+                    "description": "",
+                    "type": { "numeric": true }
+                },
+                "showLabels": {
+                    "displayName": "Show labels",
+                    "description": "",
+                    "type": { "bool": true }
+                },
+                "showLabelOnHover": {
+                    "displayName": "Show label on hover",
+                    "description": "",
+                    "type": { "bool": true }
+                },
+                "showLabelPropertiesOnHover": {
+                    "displayName": "Properties on hover",
+                    "description": "",
+                    "type": { "bool": true }
+                },
+                "showPointsOfInterest": {
+                    "displayName": "Points of interest",
+                    "description": "",
+                    "type": { "bool": true }
+                },
+                "showPointsOfInterestLabels": {
+                    "displayName": "POI with text labels",
+                    "description": "",
+                    "type": { "bool": true }
+                },
+                "pointsOfInterestMax": {
+                    "displayName": "Max number of POI",
+                    "description": "",
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "nodeSetting": {
+            "displayName": "Node settings",
+            "properties": {
+                "title": {
+                    "displayName": "Node title",
+                    "description": "Field name",
+                    "type": { "text": true }
+                },
+                "opacity": {
+                    "displayName": "Node opacity",
+                    "description": "",
+                    "type": { "numeric": true }
+                },
+                "size": {
+                    "displayName": "Node size",
+                    "description": "",
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "edgeSetting": {
+            "displayName": "Edge settings",
+            "properties": {
+                "title": {
+                    "displayName": "Edge title",
+                    "description": "Field name",
+                    "type": { "text": true }
+                },
+                "curvature": {
+                    "displayName": "Edge curvature",
+                    "description": "",
+                    "type": { "numeric": true }
+                },
+                "opacity": {
+                    "displayName": "Edge opacity",
+                    "description": "",
+                    "type": { "numeric": true }
+                },
+                "showAarrows": {
+                    "displayName": "Show arrows",
+                    "description": "",
+                    "type": { "bool": true }
+                }
+            }
+        },
+        "menuSetting": {
+            "displayName": "Menu settings",
+            "properties": {
+                "showInfo": {
+                    "displayName": "Show info",
+                    "description": "",
+                    "type": { "bool": true }
+                },
+                "showMenu": {
+                    "displayName": "Show menu",
+                    "description": "",
+                    "type": { "bool": true }
+                },
+                "showToolbar": {
+                    "displayName": "Show toolbar",
+                    "description": "",
+                    "type": { "bool": true }
+                }
+            }
+        },
+        "panelSetting": {
+            "displayName": "Panel settings",
+            "properties": {
+                "showHistograms": {
+                    "displayName": "Show histograms",
+                    "description": "",
+                    "type": { "bool": true }
+                },
+                "showTimebars": {
+                    "displayName": "Show timebars",
+                    "description": "",
+                    "type": { "bool": true }
+                }
+            }
+        },
+        "layoutSetting": {
+            "displayName": "Layout settings",
+            "properties": {
+                "dissuadeHubs": {
+                    "displayName": "Dissuade hubs",
+                    "description": "",
+                    "type": { "bool": true }
+                },
+                "edgeInfluence": {
+                    "displayName": "Edge influence",
+                    "description": "0-10; generally between 0 and 1",
+                    "type": { "numeric": true }
+                },
+                "strongGravity": {
+                    "displayName": "Strong gravity",
+                    "description": "More compact layout",
+                    "type": { "bool": true }
+                },
+                "gravity": {
+                    "displayName": "Gravity",
+                    "description": "",
+                    "type": { "numeric": true }
+                },
+                "linLog": {
+                    "displayName": "LinLog",
+                    "description": "Stronger seperation between nodes",
+                    "type": { "bool": true }
+                },
+                "precisionVsSpeed": {
+                    "displayName": "Precision vs speed",
+                    "description": "Between 0 and 1",
+                    "type": { "numeric": true }
+                },
+                "scalingRatio": {
+                    "displayName": "Scaling ratio",
+                    "description": "Between 0 and 1",
+                    "type": { "numeric": true }
                 }
             }
         }
