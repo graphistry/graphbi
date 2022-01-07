@@ -208,7 +208,7 @@
                         }
                     }
                 },
-                "color": {
+                "text": {
                     "displayName": "Text color",
                     "type": {
                         "fill": {
