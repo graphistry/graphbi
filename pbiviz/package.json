@@ -2,31 +2,34 @@
     "name": "@graphistry/graphbi",
     "version": "0.1.0",
     "scripts": {
+        "cert": "pbiviz --create-cert",
         "eslint": "eslint 'src/**/*.ts'",
         "eslint:fix": "eslint --fix 'src/**/*.ts'",
-        "lint": "npm run eslint && npm run tslint",
+        "lint": "npm run eslint && npm run lint:ts && npm rrun lint:less",
+        "lint:ts": "node node_modules/tslint/bin/tslint -r \"node_modules/tslint-microsoft-contrib\" \"+(src|test)/**/*.ts?\"",
+        "lint:less": "stylelint -s less \"style/**/*.less\"",
+        "lock:fix": "npm i --package-lock-only",
         "package": "pbiviz package",
         "pbiviz": "pbiviz",
         "prettier": "prettier 'src/**/*.ts'",
         "prettier:fix": "prettier --write 'src/**/*.ts'",
         "start": "pbiviz start",
         "test": "pbiviz package --resources --no-minify --no-pbiviz",
-        "tslint": "tslint -r \"node_modules/tslint-microsoft-contrib\"  \"+(src|test)/**/*.ts\"",
         "tslint-check": "tslint-config-prettier-check ./tslint.json"
     },
     "dependencies": {
-        "@types/jquery": "^3.5.8",
-        "@types/react": "^17.0.37",
-        "@types/react-dom": "^17.0.11",
+        "@graphistry/client-api-react": "4.0.0-alpha.4",
         "jquery": "3.6.0",
         "powerbi-visuals-api": "~3.8.0",
         "powerbi-visuals-utils-dataviewutils": "2.4.1",
         "react": "17.0.2",
         "react-dom": "17.0.2",
-        "regenerator-runtime": "0.13.9",
-        "uuid": "8.3.2"
+        "regenerator-runtime": "0.13.9"
     },
     "devDependencies": {
+        "@types/jquery": "^3.5.9",
+        "@types/react": "17.0.37",
+        "@types/react-dom": "17.0.11",
         "@typescript-eslint/eslint-plugin": "5.4.0",
         "@typescript-eslint/parser": "5.4.0",
         "eslint": "8.3.0",
@@ -41,6 +44,7 @@
         "prettier": "2.5.0",
         "tslint": "^5.20.1",
         "tslint-config-prettier": "^1.18.0",
-        "tslint-microsoft-contrib": "^6.2.0"
+        "tslint-microsoft-contrib": "^6.2.0",
+        "typescript": "4.5.2"
     }
 }

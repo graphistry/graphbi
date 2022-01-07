@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import { GraphistryClient } from './GraphistryClient';
 
 export enum GraphistryFileType {
@@ -29,7 +28,7 @@ export class GraphistryFile {
 
     constructor(type: GraphistryFileType) {
         this.FileType = 'json';
-        this.Name = uuidv4();
+        this.Name = 'my pbi';
         this.Type = type;
         this._graphistryClient = new GraphistryClient();
     }

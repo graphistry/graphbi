@@ -1,6 +1,8 @@
 // import "core-js/stable";
 // import 'regenerator-runtime/runtime'
+import '@graphistry/client-api-react/assets/index.less';
 import '../style/visual.less';
+
 import powerbi from 'powerbi-visuals-api'; // tslint:disable-line
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
@@ -12,8 +14,13 @@ import { VisualSettings } from './VisualSettings';
 import { GraphistryDataset } from './services/GraphistryDataset';
 import { GraphistryFile, GraphistryFileType } from './services/GraphistryFile';
 import { config, GraphistryClient } from './services/GraphistryClient';
+import { LoadState } from './LoadState';
 
-let linkNum = 0;
+// Import React dependencies and the added component
+import * as React from "react";
+import * as ReactDOM from "react-dom";
+import { Main } from './components/Main'
+
 
 export class Visual implements IVisual {
     private host: IVisualHost;
@@ -26,15 +33,38 @@ export class Visual implements IVisual {
 
     private client: GraphistryClient;
 
+    private reactRoot: React.ReactElement<any>;
+
+    private target: HTMLElement;
+
+    private datasetID: string;
+
+    private state: LoadState; 
+
     constructor(options: VisualConstructorOptions) {
+
         console.debug('Visual::constructor()');
         this.host = options.host;
         // this.locale = options.host.locale;
         this.client = new GraphistryClient();
         this.rootElement = $(options.element);
         this.rootElement.append('<h2>Graphistry Visual: First set fields Source and Destination</h2>');
+        this.datasetID = null;
 
         this.visualSettings = <VisualSettings>VisualSettings.getDefault();
+
+        this.state = LoadState.MISCONFIGURED;
+
+        this.reactRoot = <React.ReactElement<any>>React.createElement(Main, {
+            v: `constructed: ${Date.now()}`,
+            view: null,
+            config,
+            datasetID: this.datasetID,
+            state: this.state
+        });
+        this.target = options.element;
+        ReactDOM.render(this.reactRoot, this.target);
+
         console.debug('////constructed');
     }
 
@@ -101,67 +131,6 @@ export class Visual implements IVisual {
         return true;
     }
 
-    private notReadyIframe(view) {
-        console.debug('Visual::notReadyIframe()', { config });
-        this.rootElement.empty();
-        this.rootElement.append('<h1>Graphistry for PowerBI Custom Visual</h1>');
-
-        let isConfigureAccountReady = true;
-        this.rootElement.append('<h2>1. Configure account in <code>Format panel: Graphistry Settings</code></h2>');
-        const ul = this.rootElement.append('<ul></ul>');
-        if (config.UrlBase === '') {
-            ul.append('<li>❌ <code>Format.GraphistrySettings.GraphistryServer</code>: undefined</li>');
-            isConfigureAccountReady = false;
-        }
-        if (config.UserName === '') {
-            ul.append('<li>❌ <code>Format.GraphistrySettings.GraphistryUserName</code>: undefined</li>');
-            isConfigureAccountReady = false;
-        }
-        if (config.Password === '') {
-            ul.append('<li>❌ <code>Format.GraphistrySettings.GraphistryPassword</code>: undefined</li>');
-            isConfigureAccountReady = false;
-        }
-        if (isConfigureAccountReady) {
-            this.rootElement.append('✔️ Done');
-        }
-
-        this.rootElement.append('<h2>2. Bind edge source/destination in <code>Fields panel</code></h3>');
-        if (!view.metadata.columns.find((c) => c.roles.Source)) {
-            this.rootElement.append('<p>❌ <code>Fields.Source</code>: undefined</p>');
-        }
-        if (!view.metadata.columns.find((c) => c.roles.Destination)) {
-            this.rootElement.append('<p>❌ <code>Fields.Destination</code>: undefined</p>');
-        }
-    }
-
-    private updateIframe(datasetID: string) {
-        console.debug('Visual::updateIframeOverride()', { datasetID });
-        this.rootElement.empty();
-        const url = `${this.getGraphistryBaseUrl()}/graph/graph.html?dataset=${datasetID}&play=3000`;
-        const iframeUrl = `${url}&splashAfter=true`;
-        const frame = $('<iframe />', {
-            allowfullscreen: 'true',
-            webkitallowfullscreen: 'true',
-            mozallowfullscreen: 'true',
-            oallowfullscreen: 'true',
-            msallowfullscreen: 'true',
-            // name: 'frame1',
-            // id: 'frame1',
-            src: iframeUrl,
-        });
-        this.rootElement.append(frame);
-        linkNum += 1;
-        const linkID = `vizlink-${linkNum}`;
-        this.rootElement
-            .append(`<h3>Open in a <a id="${linkID}" href="${iframeUrl}">new tab: ${iframeUrl}</a></h3>`)
-            .on('click', `#${linkID}`, (e) => {
-                console.debug('Visual::updateIframeOverride() link click', { e });
-                e.preventDefault();
-                this.host.launchUrl(iframeUrl);
-            });
-        console.debug('////Visual::updateIframeOverride');
-    }
-
     private prevValues = {};
 
     private prevFiles = { edgeFile: null, nodeFile: null };
@@ -170,7 +139,7 @@ export class Visual implements IVisual {
 
     private previousRendered = false;
 
-    private uploadDatasetAndRender(view) {
+    private uploadDataset(view) {
         /*
         var nodeFile = new GraphistryFile(GraphistryFileType.Node);
         nodeFile.setData({
@@ -196,11 +165,12 @@ export class Visual implements IVisual {
         const edgeFileColumnValues = {
             [srcColName]: srcCol.values,
             [dstColName]: dstCol.values,
-            ...Object.fromEntries(
-                edgePropertyMetadatas.map((c) => [c.queryName, view.categorical.categories[c.index].values]),
-            ),
             ...(edgeWeightMetadata ? { [edgeWeightColName]: edgeWeightCol.values } : {}),
         };
+        edgePropertyMetadatas.forEach(c => {
+            edgeFileColumnValues[c] = [c.queryName, view.categorical.categories[c.index].values];
+        });
+
         const edgeValuesAllSame = Object.keys(edgeFileColumnValues)
             .map((colName) => this.prevValues[colName] === edgeFileColumnValues[colName])
             .every((check) => check);
@@ -247,28 +217,44 @@ export class Visual implements IVisual {
 
         // //////////////////////////////////////////////////////////////////////////////
 
-        this.rootElement.empty();
-        this.rootElement.append('<h2>Graphistry Visual: Uploading data...</h2>');
+        //this.rootElement.empty();
+        //this.rootElement.append('<h2>Graphistry Visual: Uploading data...</h2>');
 
         const dataset = new GraphistryDataset();
         // dataSet.addFile(nodeFile);
         dataset.addFile(edgeFile);
         dataset.addBindings(bindings);
 
-        this.rootElement.append('Created local schema, now uploading...');
+        //this.rootElement.append('Created local schema, now uploading...');
         this.previousRendered = true;
-        return dataset.getGraphUrl().then((datasetID) => {
-            console.debug('update deferred has id', { datasetID });
-            this.updateIframe(datasetID);
-            console.debug('////update fresh ID, stop');
-            return datasetID;
+        const uploading = dataset.getGraphUrl();
+        return {
+            uploading,
+            uploaded: uploading.then((datasetID) => {
+                console.debug('update deferred has id', { datasetID });
+                return datasetID;
+            })
+        };
+    }
+
+    private clear() {
+        this.state = LoadState.MISCONFIGURED;
+        this.reactRoot = <React.ReactElement<any>>React.createElement(Main, {
+            v: `cleared: ${Date.now()}`,
+            view: null,
+            config,
+            datasetID: null,
+            state: this.state
         });
+        ReactDOM.render(this.reactRoot, this.target);
     }
 
     public update(options: VisualUpdateOptions, viewModel) {
         console.debug('Visual::update()', { options, viewModel });
+
         if (!options || !options.dataViews || !options.dataViews[0]) {
             console.debug('Visual::update() no dataViews', { options });
+            this.clear();
             return;
         }
         const view = options.dataViews[0];
@@ -281,22 +267,67 @@ export class Visual implements IVisual {
 
         if (config.DatasetOverride && config.UrlBase) {
             console.debug('as DatasetOverride', { datasetOverride: config.DatasetOverride });
-            this.updateIframe(config.DatasetOverride);
+            //this.updateIframe(config.DatasetOverride);
             this.previousRendered = false;
+
+            this.state = LoadState.UPLOADED;
+            this.reactRoot = <React.ReactElement<any>>React.createElement(Main, {
+                v: `updated baked: ${Date.now()}`,
+                view,
+                config,
+                datasetID: config.DatasetOverride,
+                state: this.state
+            });
+            ReactDOM.render(this.reactRoot, this.target);
             console.debug('////update has DatasetOverride, stop');
             return;
         }
 
         console.debug('Visual::isReadyForUpload()', { visualSettings: this.visualSettings });
         if (!this.client.isServerConfigured() || !this.isReadySrcDstIframe(view)) {
-            this.notReadyIframe(view);
+            //this.notReadyIframe(view);
             this.previousRendered = false;
+            this.state = LoadState.MISCONFIGURED;
+            this.reactRoot = <React.ReactElement<any>>React.createElement(Main, {
+                v: `updated misconfigured: ${Date.now()}`,
+                view,
+                config,
+                datasetID: this.datasetID,
+                state: this.state
+            });
+            ReactDOM.render(this.reactRoot, this.target);    
             console.debug('////update not ready for upload, stop');
             return;
         }
 
+        //FIXME cancelation
         console.debug('update readyForUpload, continue');
-        this.uploadDatasetAndRender(view);
+        const { uploading, uploaded } = this.uploadDataset(view);
+        if (uploading) {
+            this.state = LoadState.UPLOADING;
+            this.reactRoot = <React.ReactElement<any>>React.createElement(Main, {
+                v: `updated: ${Date.now()}`,
+                view: (!options || !options.dataViews || !options.dataViews[0])
+                    ? null
+                    : options.dataViews[0],
+                config,
+                datasetID: this.datasetID,
+                state: this.state
+            });
+            ReactDOM.render(this.reactRoot, this.target);
+        }
+        uploaded.then((datasetID) => {
+            this.state = LoadState.UPLOADED;
+            this.datasetID = datasetID;
+            this.reactRoot = <React.ReactElement<any>>React.createElement(Main, {
+                v: `updated uploaded: ${Date.now()}`,
+                view,
+                config,
+                datasetID: this.datasetID,
+                state: this.state
+            });
+            ReactDOM.render(this.reactRoot, this.target);
+        });
     }
 
     private getGraphistryBaseUrl(): string {
