@@ -60,10 +60,10 @@ function Graphistry(
                 precisionVsSpeed: config.LayoutPrecisionVsSpeed,
                 scalingRatio: config.LayoutScalingRatio,
                 showArrows: config.EdgeShowArrows,
-                
 
                 ...(config.LabelPointsOfInterestMax !== undefined ? {pointsOfInterestMax: config.LabelPointsOfInterestMax} : {}),
             };
+            console.debug('Graphistry::render2', {url, datasetID, UrlBase: config.UrlBase, extraOpts});
             return (<>
                 <GraphistryJS
                     dataset={datasetID}
