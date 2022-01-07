@@ -19,7 +19,7 @@ CERTS_PATH="${CERTS_PATH}" \
 PYTHONPATH="${PYTHONPATH}" \
 APP_BUILD_TAG=`cat VERSION`-dev \
 VERSION=`cat VERSION` \
-docker compose \
+docker-compose \
   -f docker-compose.dev.yml \
   $@
 
