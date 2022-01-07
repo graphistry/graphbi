@@ -147,6 +147,10 @@ export class Visual implements IVisual {
     private previousRendered = false;
 
     private uploadDataset(view: powerbi.DataView) {
+
+        try {
+
+        console.debug('@uploadDataset', { view });
         /*
         var nodeFile = new GraphistryFile(GraphistryFileType.Node);
         nodeFile.setData({
@@ -158,15 +162,16 @@ export class Visual implements IVisual {
 
         const srcColMetadata = view.metadata.columns.find((c) => c.roles.Source);
         const srcColName = srcColMetadata.queryName;
-        const srcCol = view.categorical.categories[srcColMetadata.index];
+        const srcCol = view.categorical.categories.find(c => c.source.queryName === srcColName);
         const dstColMetadata = view.metadata.columns.find((c) => c.roles.Destination);
         const dstColName = dstColMetadata.queryName;
-        const dstCol = view.categorical.categories[dstColMetadata.index];
+        const dstCol = view.categorical.categories.find(c => c.source.queryName === dstColName);
         const edgePropertyMetadatas = view.metadata.columns.filter((c) => c.roles.EdgeProperty);
         const edgeWeightMetadata = view.metadata.columns.find((c) => c.roles.EdgeWeight);
         // categorical.values because measure?
-        const edgeWeightCol = edgeWeightMetadata ? view.categorical.categories[edgeWeightMetadata.index] : undefined;
+        const edgeWeightCol = edgeWeightMetadata ? view.categorical.values.find(c => c.source.queryName === edgeWeightMetadata.queryName) : undefined;
         const edgeWeightColName = edgeWeightMetadata ? edgeWeightMetadata.queryName : undefined;
+        console.debug('edgeWeights', { edgeWeightCol, edgeWeightColName });
 
         // upload edge values if new, else reuse edge file
         const edgeFileColumnValues = {
@@ -174,9 +179,11 @@ export class Visual implements IVisual {
             [dstColName]: dstCol.values,
             ...(edgeWeightMetadata ? { [edgeWeightColName]: edgeWeightCol.values } : {}),
         };
+        console.debug('edgeFileColumnValues', { edgeFileColumnValues });
         edgePropertyMetadatas.forEach((c) => {
-            edgeFileColumnValues[c.queryName] = view.categorical.categories[c.index].values;
+            edgeFileColumnValues[c.queryName] = view.categorical.categories.find(c2 => c2.source.queryName === c.queryName).values;
         });
+        console.debug('with settings', { srcColName, dstColName, edgeWeightColName, edgeFileColumnValues});
 
         const edgeValuesAllSame = Object.keys(edgeFileColumnValues)
             .map((colName) => {
@@ -273,6 +280,10 @@ export class Visual implements IVisual {
                 return { datasetID, numEdges, numNodes };
             }),
         };
+
+        } catch (e) {
+            console.error('Visual::uploadDataset() error', e);
+        }
     }
 
     private clear() {
