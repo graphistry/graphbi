@@ -173,7 +173,7 @@
                     "description": "No vertical movement",
                     "type": { "bool": true }
                 },
-                "lockedRadius": {
+                "lockedR": {
                     "displayName": "Lock radius",
                     "description": "Nodes move with constant distance from center",
                     "type": { "bool": true }
