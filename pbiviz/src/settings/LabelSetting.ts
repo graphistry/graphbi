@@ -1,0 +1,21 @@
+import powerbi from 'powerbi-visuals-api'; // tslint:disable-line
+
+export class LabelSetting {
+    public background: powerbi.Fill = {solid: {color: '#111133'}};
+
+    public color: powerbi.Fill = {solid: {color: '#ffffff'}};
+
+    public opacity: number | undefined = undefined;
+
+    public showLabels: boolean = true;
+
+    public showLabelOnHover: boolean = true;
+
+    public showLabelPropertiesOnHover: boolean = true;
+
+    public showPointsOfInterest: boolean = true;
+
+    public showPointsOfInterestLabels: boolean = true;
+
+    public pointsOfInterestMax: number | undefined = undefined;
+}
