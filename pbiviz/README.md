@@ -41,7 +41,7 @@ npm run prettier:fix
 Create host certs for https://localhost:8080 needed for https://app.powerbi.com/ live testing:
 
 ```bash
-/bootstrap_host.dev.sh 
+./bootstrap_host.dev.sh
 ```
 
 MS docs: [Install a certificate](https://docs.microsoft.com/en-us/power-bi/developer/visuals/environment-setup?tabs=sdk2osx)
