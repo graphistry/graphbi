@@ -37,26 +37,12 @@ function Graphistry(
             const extraOpts = {
                 play,
                 showSplashScreen: config.ChartLoadShowSplashScreen,
-                backgroundColor: config.BackgroundColor.solid.color,
+                backgroundColor: config.BackgroundColor,
                 lockedX: config.PositionLockedX,
                 lockedY: config.PositionLockedY,
                 lockedR: config.PositionLockedRadius,
-                ...(function () {
-                    try {
-                        return {labelBackground: config.LabelBackground.solid.color};
-                    } catch (e) {
-                        console.warn('Could not read config label background color', config.LabelBackground);
-                        return {};
-                    }
-                }()),
-                ...(function () {
-                    try {
-                        return {labelColor: config.LabelColor.solid.color};
-                    } catch (e) {
-                        console.warn('Could not read config label color', config.LabelColor);
-                        return {};
-                    }
-                }),
+                labelBackground: config.LabelBackground,
+                labelColor: config.LabelColor,
                 showPointsOfInterest: config.LabelShowPointsOfInterest,
                 showPointsOfInterestLabels: config.LabelShowPointsOfInterestLabels,
                 showLabelOnHover: config.LabelShowLabelOnHover,

@@ -328,7 +328,7 @@ export class Visual implements IVisual {
         config.EdgeShowArrows = this.visualSettings.edgeSetting.showArrows;
         config.EdgeTitle = deserializeUndefined(this.visualSettings.edgeSetting.title);
         config.LabelBackground = this.visualSettings.labelSetting.background;
-        config.LabelColor = this.visualSettings.labelSetting.color;
+        config.LabelColor = this.visualSettings.labelSetting.text;
         config.LabelOpacity = this.visualSettings.labelSetting.opacity;
         config.LabelShowLabels = this.visualSettings.labelSetting.showLabels;
         config.LabelShowLabelOnHover = this.visualSettings.labelSetting.showLabelOnHover;
