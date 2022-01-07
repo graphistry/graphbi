@@ -5,7 +5,7 @@
         "cert": "pbiviz --create-cert",
         "eslint": "eslint 'src/**/*.ts'",
         "eslint:fix": "eslint --fix 'src/**/*.ts'",
-        "lint": "npm run eslint && npm run lint:ts && npm rrun lint:less",
+        "lint": "npm run eslint && npm run lint:ts && npm run lint:less",
         "lint:ts": "node node_modules/tslint/bin/tslint -r \"node_modules/tslint-microsoft-contrib\" \"+(src|test)/**/*.ts?\"",
         "lint:less": "stylelint -s less \"style/**/*.less\"",
         "lock:fix": "npm i --package-lock-only",
@@ -18,7 +18,7 @@
         "tslint-check": "tslint-config-prettier-check ./tslint.json"
     },
     "dependencies": {
-        "@graphistry/client-api-react": "4.0.0-alpha.4",
+        "@graphistry/client-api-react": "4.0.0-alpha.7",
         "jquery": "3.6.0",
         "powerbi-visuals-api": "~3.8.0",
         "powerbi-visuals-utils-dataviewutils": "2.4.1",
