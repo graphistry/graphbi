@@ -344,7 +344,7 @@ export class Visual implements IVisual {
         config.PositionY = this.visualSettings.positionSetting.positionY;
         config.PositionLockedX = this.visualSettings.positionSetting.lockedX;
         config.PositionLockedY = this.visualSettings.positionSetting.lockedY;
-        config.PositionLockedRadius = this.visualSettings.positionSetting.lockedRadius;
+        config.PositionLockedRadius = this.visualSettings.positionSetting.lockedR;
 
         if (config.DatasetOverride && config.UrlBase) {
             console.debug('as DatasetOverride', { datasetOverride: config.DatasetOverride });

@@ -40,9 +40,23 @@ function Graphistry(
                 backgroundColor: config.BackgroundColor.solid.color,
                 lockedX: config.PositionLockedX,
                 lockedY: config.PositionLockedY,
-                lockedRadius: config.PositionLockedRadius,
-                labelBackground: config.LabelBackground.solid.color,
-                labelColor: config.LabelColor.solid.color,
+                lockedR: config.PositionLockedRadius,
+                ...(function () {
+                    try {
+                        return {labelBackground: config.LabelBackground.solid.color};
+                    } catch (e) {
+                        console.warn('Could not read config label background color', config.LabelBackground);
+                        return {};
+                    }
+                }()),
+                ...(function () {
+                    try {
+                        return {labelColor: config.LabelColor.solid.color};
+                    } catch (e) {
+                        console.warn('Could not read config label color', config.LabelColor);
+                        return {};
+                    }
+                }),
                 showPointsOfInterest: config.LabelShowPointsOfInterest,
                 showPointsOfInterestLabels: config.LabelShowPointsOfInterestLabels,
                 showLabelOnHover: config.LabelShowLabelOnHover,

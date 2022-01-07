@@ -7,5 +7,5 @@ export class PositionSetting {
 
     public lockedY: boolean = false;
 
-    public lockedRadius: boolean = false;
+    public lockedR: boolean = false;
 }
