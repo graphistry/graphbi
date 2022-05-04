@@ -13,7 +13,7 @@ Creates `dist/`
 
 ### Regenerate package lock
 
-In host: `npm i --package-lock-only`
+In host: `npm i --package-lock-only --legacy-peer-deps`
 
 (TODO: as docker cmd)
 
