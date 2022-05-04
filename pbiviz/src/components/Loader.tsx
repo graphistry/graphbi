@@ -22,14 +22,14 @@ function Loader({view, config, state}) {
     }
 
     return (<>
-        <h1>Graphistry for PowerBI Custom Visual</h1>
+        <h1>Graphistry for PowerBI Custom </h1>
         <h2>1. Configure account in <code>Format panel: Graphistry Settings</code></h2>
         {
             isConfigureAccountReady(config)
                 ? <span>✔️ Done</span>
                 : (<ul>
                     {
-                        config.UrlBase === '' 
+                        config.UrlBase === ''
                             ? <li>❌ <code>Format.GraphistrySettings.GraphistryServer</code>: undefined</li>
                             : null
                     }

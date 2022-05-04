@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "skipLibCheck": true,
     "allowJs": true,
     "checkJs": false,
     "emitDecoratorMetadata": true,
@@ -13,10 +14,11 @@
     "esModuleInterop": true,
     "jsx": "react-jsx",
     "types": ["jquery", "react", "react-dom"],
-    "lib": ["es2015", "dom"]
+    "lib": ["es2015", "dom"],
+    "allowSyntheticDefaultImports": true
   },
   "files": [
-    "src/Visual.ts",
+    "src/visual.ts",
     "src/localization/Localization.ts",
     "src/localization/localizationHelper.ts",
     "src/localization/localizedResources.ts",
