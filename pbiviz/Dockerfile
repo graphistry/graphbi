@@ -14,7 +14,7 @@ COPY package.json package-lock.json /opt/graphbi/pbiviz/
 RUN --mount=type=cache,target=/usr/src/app/.npm \
     npm set cache /usr/src/app/.npm \
     && echo "=== Installing build tools ===" \
-    && npm install
+    && npm install --legacy-peer-deps
 
 COPY \
     .eslintrc.json .prettierrc \
@@ -23,4 +23,4 @@ COPY \
     /opt/graphbi/pbiviz/
 COPY assets/ /opt/graphbi/pbiviz/assets/
 COPY src/ /opt/graphbi/pbiviz/src/
-COPY style/ /opt/graphbi/pbiviz/style/ 
+COPY style/ /opt/graphbi/pbiviz/style/
