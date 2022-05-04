@@ -147,11 +147,9 @@ export class Visual implements IVisual {
     private previousRendered = false;
 
     private uploadDataset(view: powerbi.DataView) {
-
         try {
-
-        console.debug('@uploadDataset', { view });
-        /*
+            console.debug('@uploadDataset', { view });
+            /*
         var nodeFile = new GraphistryFile(GraphistryFileType.Node);
         nodeFile.setData({
             "n":["a","b","c"],
@@ -160,127 +158,144 @@ export class Visual implements IVisual {
         });
         */
 
-        const srcColMetadata = view.metadata.columns.find((c) => c.roles.Source);
-        const srcColName = srcColMetadata.queryName;
-        const srcCol = view.categorical.categories.find(c => c.source.queryName === srcColName);
-        const dstColMetadata = view.metadata.columns.find((c) => c.roles.Destination);
-        const dstColName = dstColMetadata.queryName;
-        const dstCol = view.categorical.categories.find(c => c.source.queryName === dstColName);
-        const edgePropertyMetadatas = view.metadata.columns.filter((c) => c.roles.EdgeProperty);
-        const edgeWeightMetadata = view.metadata.columns.find((c) => c.roles.EdgeWeight);
-        // categorical.values because measure?
-        const edgeWeightCol = edgeWeightMetadata ? view.categorical.values.find(c => c.source.queryName === edgeWeightMetadata.queryName) : undefined;
-        const edgeWeightColName = edgeWeightMetadata ? edgeWeightMetadata.queryName : undefined;
-        console.debug('edgeWeights', { edgeWeightCol, edgeWeightColName });
+            const srcColMetadata = view.metadata.columns.find((c) => c.roles.Source);
+            const srcColName = srcColMetadata.queryName;
+            const srcCol = view.categorical.categories.find((c) => c.source.queryName === srcColName);
+            const dstColMetadata = view.metadata.columns.find((c) => c.roles.Destination);
+            const dstColName = dstColMetadata.queryName;
+            const dstCol = view.categorical.categories.find((c) => c.source.queryName === dstColName);
+            const edgePropertyMetadatas = view.metadata.columns.filter((c) => c.roles.EdgeProperty);
+            const edgeWeightMetadata = view.metadata.columns.find((c) => c.roles.EdgeWeight);
+            // categorical.values because measure?
+            const edgeWeightCol = edgeWeightMetadata
+                ? view.categorical.values.find((c) => c.source.queryName === edgeWeightMetadata.queryName)
+                : undefined;
+            const edgeWeightColName = edgeWeightMetadata ? edgeWeightMetadata.queryName : undefined;
+            console.debug('edgeWeights', { edgeWeightCol, edgeWeightColName });
 
-        // upload edge values if new, else reuse edge file
-        const edgeFileColumnValues = {
-            [srcColName]: srcCol.values,
-            [dstColName]: dstCol.values,
-            ...(edgeWeightMetadata ? { [edgeWeightColName]: edgeWeightCol.values } : {}),
-        };
-        console.debug('edgeFileColumnValues', { edgeFileColumnValues });
-        edgePropertyMetadatas.forEach((c) => {
-            edgeFileColumnValues[c.queryName] = view.categorical.categories.find(c2 => c2.source.queryName === c.queryName).values;
-        });
-        console.debug('with settings', { srcColName, dstColName, edgeWeightColName, edgeFileColumnValues});
+            // upload edge values if new, else reuse edge file
+            const edgeFileColumnValues = {
+                [srcColName]: srcCol.values,
+                [dstColName]: dstCol.values,
+                ...(edgeWeightMetadata ? { [edgeWeightColName]: edgeWeightCol.values } : {}),
+            };
+            console.debug('edgeFileColumnValues', { edgeFileColumnValues });
+            edgePropertyMetadatas.forEach((c) => {
+                edgeFileColumnValues[c.queryName] = view.categorical.categories.find(
+                    (c2) => c2.source.queryName === c.queryName,
+                ).values;
+            });
+            console.debug('with settings', { srcColName, dstColName, edgeWeightColName, edgeFileColumnValues });
 
-        const edgeValuesAllSame = Object.keys(edgeFileColumnValues)
-            .map((colName) => {
-                if (this.prevValues[colName] === edgeFileColumnValues[colName]) {
-                    return true;
-                } else {
-                    console.debug('edge alias delta on prop', colName, this.prevValues[colName], edgeFileColumnValues[colName]);
-                    if (!this.prevValues || !this.prevValues[colName] || !edgeFileColumnValues[colName]) {
-                        console.debug('missing ref');
-                        return false;
-                    }
-                    if (this.prevValues[colName].length !== edgeFileColumnValues[colName].length) {
-                        console.debug('diff lengths', this.prevValues[colName].length, edgeFileColumnValues[colName].length);
-                        return false;
-                    }
-                    for (let i = 0; i < this.prevValues[colName].length; i++) {
-                        if (this.prevValues[colName][i] !== edgeFileColumnValues[colName][i]) {
-                            console.debug('delta on i', i, this.prevValues[colName][i], edgeFileColumnValues[colName][i]);
+            const edgeValuesAllSame = Object.keys(edgeFileColumnValues)
+                .map((colName) => {
+                    if (this.prevValues[colName] === edgeFileColumnValues[colName]) {
+                        return true;
+                    } else {
+                        console.debug(
+                            'edge alias delta on prop',
+                            colName,
+                            this.prevValues[colName],
+                            edgeFileColumnValues[colName],
+                        );
+                        if (!this.prevValues || !this.prevValues[colName] || !edgeFileColumnValues[colName]) {
+                            console.debug('missing ref');
                             return false;
                         }
+                        if (this.prevValues[colName].length !== edgeFileColumnValues[colName].length) {
+                            console.debug(
+                                'diff lengths',
+                                this.prevValues[colName].length,
+                                edgeFileColumnValues[colName].length,
+                            );
+                            return false;
+                        }
+                        for (let i = 0; i < this.prevValues[colName].length; i++) {
+                            if (this.prevValues[colName][i] !== edgeFileColumnValues[colName][i]) {
+                                console.debug(
+                                    'delta on i',
+                                    i,
+                                    this.prevValues[colName][i],
+                                    edgeFileColumnValues[colName][i],
+                                );
+                                return false;
+                            }
+                        }
+                        console.debug('some column values even if diff alias');
+                        return true;
                     }
-                    console.debug('some column values even if diff alias');
-                    return true;
-                }
-            })
-            .every((check) => check);
-        // eslint-disable-next-line prettier/prettier
-        let {
-            prevFiles: { edgeFile },
-        } = this;
-        const isReusedEdgeFile = edgeFile && edgeValuesAllSame;
-        console.debug('duplicate isReusedEdgeFile', isReusedEdgeFile);
-        if (!isReusedEdgeFile) {
-            edgeFile = new GraphistryFile(GraphistryFileType.Edge);
-            edgeFile.setData(edgeFileColumnValues);
-            this.prevFiles.edgeFile = edgeFile;
-            Object.assign(this.prevValues, edgeFileColumnValues);
-        }
+                })
+                .every((check) => check);
+            // eslint-disable-next-line prettier/prettier
+            let {
+                prevFiles: { edgeFile },
+            } = this;
+            const isReusedEdgeFile = edgeFile && edgeValuesAllSame;
+            console.debug('duplicate isReusedEdgeFile', isReusedEdgeFile);
+            if (!isReusedEdgeFile) {
+                edgeFile = new GraphistryFile(GraphistryFileType.Edge);
+                edgeFile.setData(edgeFileColumnValues);
+                this.prevFiles.edgeFile = edgeFile;
+                Object.assign(this.prevValues, edgeFileColumnValues);
+            }
 
-        const bindings = {
-            node_encodings: {
-                bindings: {
-                    node: 'n',
-                    ...(config.NodeTitle !== undefined ? { node_title: config.NodeTitle } : {}),
-                    ...(config.PositionX !== undefined ? { node_x: config.PositionX } : {}),
-                    ...(config.PositionY !== undefined ? { node_y: config.PositionY } : {}),
+            const bindings = {
+                node_encodings: {
+                    bindings: {
+                        node: 'n',
+                        ...(config.NodeTitle !== undefined ? { node_title: config.NodeTitle } : {}),
+                        ...(config.PositionX !== undefined ? { node_x: config.PositionX } : {}),
+                        ...(config.PositionY !== undefined ? { node_y: config.PositionY } : {}),
+                    },
                 },
-            },
-            edge_encodings: {
-                bindings: {
-                    source: srcColName,
-                    destination: dstColName,
-                    ...(edgeWeightMetadata ? { edge_weight: edgeWeightColName } : {}),
-                    ...(config.EdgeTitle !== undefined ? { edge_title: config.EdgeTitle } : {}),
+                edge_encodings: {
+                    bindings: {
+                        source: srcColName,
+                        destination: dstColName,
+                        ...(edgeWeightMetadata ? { edge_weight: edgeWeightColName } : {}),
+                        ...(config.EdgeTitle !== undefined ? { edge_title: config.EdgeTitle } : {}),
+                    },
                 },
-            },
-            metadata: {},
-            name: 'testdata',
-        };
-        const isReusedBindings = JSON.stringify(bindings) === JSON.stringify(this.prevBindings);
-        console.debug('duplicate isReusedBindings', isReusedBindings, { bindings, prev: this.prevBindings });
+                metadata: {},
+                name: 'testdata',
+            };
+            const isReusedBindings = JSON.stringify(bindings) === JSON.stringify(this.prevBindings);
+            console.debug('duplicate isReusedBindings', isReusedBindings, { bindings, prev: this.prevBindings });
 
-        // //////////////////////////////////////////////////////////////////////////////
+            // //////////////////////////////////////////////////////////////////////////////
 
-        if (this.previousRendered && isReusedEdgeFile && isReusedBindings) {
-            console.debug('no change, reuse iframe');
-            return null;
-        }
+            if (this.previousRendered && isReusedEdgeFile && isReusedBindings) {
+                console.debug('no change, reuse iframe');
+                return null;
+            }
 
-        this.prevBindings = bindings;
+            this.prevBindings = bindings;
 
-        // //////////////////////////////////////////////////////////////////////////////
+            // //////////////////////////////////////////////////////////////////////////////
 
-        // this.rootElement.empty();
-        // this.rootElement.append('<h2>Graphistry Visual: Uploading data...</h2>');
+            // this.rootElement.empty();
+            // this.rootElement.append('<h2>Graphistry Visual: Uploading data...</h2>');
 
-        const dataset = new GraphistryDataset();
-        // dataSet.addFile(nodeFile);
-        dataset.addFile(edgeFile);
-        dataset.addBindings(bindings);
+            const dataset = new GraphistryDataset();
+            // dataSet.addFile(nodeFile);
+            dataset.addFile(edgeFile);
+            dataset.addBindings(bindings);
 
-        const numEdges = srcCol.values.length;
-        console.debug('Visual::uploadDataset() edges', { numEdges });
-        const numNodes = new Set(srcCol.values.concat(dstCol.values)).size;
-        console.debug('Visual::uploadDataset() nodes', { numNodes });
+            const numEdges = srcCol.values.length;
+            console.debug('Visual::uploadDataset() edges', { numEdges });
+            const numNodes = new Set(srcCol.values.concat(dstCol.values)).size;
+            console.debug('Visual::uploadDataset() nodes', { numNodes });
 
-        // this.rootElement.append('Created local schema, now uploading...');
-        this.previousRendered = true;
-        const uploading = dataset.getGraphUrl();
-        return {
-            uploading,
-            uploaded: uploading.then((datasetID) => {
-                console.debug('update deferred has id', { datasetID });
-                return { datasetID, numEdges, numNodes };
-            }),
-        };
-
+            // this.rootElement.append('Created local schema, now uploading...');
+            this.previousRendered = true;
+            const uploading = dataset.getGraphUrl();
+            return {
+                uploading,
+                uploaded: uploading.then((datasetID) => {
+                    console.debug('update deferred has id', { datasetID });
+                    return { datasetID, numEdges, numNodes };
+                }),
+            };
         } catch (e) {
             console.error('Visual::uploadDataset() error', e);
         }
@@ -414,7 +429,7 @@ export class Visual implements IVisual {
                 state: this.state,
             });
             ReactDOM.render(this.reactRoot, this.target);
-        }        
+        }
         const { uploading, uploaded } = uploadDatasetResult;
         if (uploading) {
             this.state = LoadState.UPLOADING;

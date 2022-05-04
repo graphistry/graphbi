@@ -14,7 +14,7 @@ export interface GraphistryConfiguration {
     EdgeOpacity: number | null;
     EdgeShowArrows: boolean;
     EdgeTitle: string | null;
-    LabelBackground: powerbi.Fill,
+    LabelBackground: powerbi.Fill;
     LabelColor: powerbi.Fill;
     LabelOpacity: number | null;
     LabelShowLabels: boolean;
@@ -52,15 +52,15 @@ const config: GraphistryConfiguration = {
     AuthToken: '',
     DatasetOverride: '',
 
-    BackgroundColor: {solid: {color: '#ffffff'}},
+    BackgroundColor: { solid: { color: '#ffffff' } },
     ChartLoadPlay: undefined,
     ChartLoadShowSplashScreen: true,
     EdgeCurvature: undefined,
     EdgeOpacity: undefined,
     EdgeShowArrows: true,
     EdgeTitle: undefined,
-    LabelBackground: {solid: {color: '#333339'}},
-    LabelColor: {solid: {color: '#ffffff'}},
+    LabelBackground: { solid: { color: '#333339' } },
+    LabelColor: { solid: { color: '#ffffff' } },
     LabelOpacity: undefined,
     LabelShowLabels: true,
     LabelShowLabelOnHover: true,
