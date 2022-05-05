@@ -109,7 +109,7 @@ export class Visual implements IVisual {
                 objectEnumeration.push({
                     objectName,
                     displayName: "Graphistry Settings",
-                    properties: { 
+                    properties: {
                         "graphistryBaseUrl": settings.graphistrySetting.graphistryBaseUrl,
                         "graphistryUserName": settings.graphistrySetting.graphistryUserName,
                         "graphistryPassword": settings.graphistrySetting.graphistryPassword,
@@ -191,39 +191,38 @@ export class Visual implements IVisual {
                 .map((colName) => {
                     if (this.prevValues[colName] === edgeFileColumnValues[colName]) {
                         return true;
-                    } else {
+                    }
+                    console.debug(
+                        'edge alias delta on prop',
+                        colName,
+                        this.prevValues[colName],
+                        edgeFileColumnValues[colName],
+                    );
+                    if (!this.prevValues || !this.prevValues[colName] || !edgeFileColumnValues[colName]) {
+                        console.debug('missing ref');
+                        return false;
+                    }
+                    if (this.prevValues[colName].length !== edgeFileColumnValues[colName].length) {
                         console.debug(
-                            'edge alias delta on prop',
-                            colName,
-                            this.prevValues[colName],
-                            edgeFileColumnValues[colName],
+                            'diff lengths',
+                            this.prevValues[colName].length,
+                            edgeFileColumnValues[colName].length,
                         );
-                        if (!this.prevValues || !this.prevValues[colName] || !edgeFileColumnValues[colName]) {
-                            console.debug('missing ref');
-                            return false;
-                        }
-                        if (this.prevValues[colName].length !== edgeFileColumnValues[colName].length) {
+                        return false;
+                    }
+                    for (let i = 0; i < this.prevValues[colName].length; i++) {  // eslint-disable-line
+                        if (this.prevValues[colName][i] !== edgeFileColumnValues[colName][i]) {
                             console.debug(
-                                'diff lengths',
-                                this.prevValues[colName].length,
-                                edgeFileColumnValues[colName].length,
+                                'delta on i',
+                                i,
+                                this.prevValues[colName][i],
+                                edgeFileColumnValues[colName][i],
                             );
                             return false;
                         }
-                        for (let i = 0; i < this.prevValues[colName].length; i++) {
-                            if (this.prevValues[colName][i] !== edgeFileColumnValues[colName][i]) {
-                                console.debug(
-                                    'delta on i',
-                                    i,
-                                    this.prevValues[colName][i],
-                                    edgeFileColumnValues[colName][i],
-                                );
-                                return false;
-                            }
-                        }
-                        console.debug('some column values even if diff alias');
-                        return true;
                     }
+                    console.debug('some column values even if diff alias');
+                    return true;
                 })
                 .every((check) => check);
             // eslint-disable-next-line prettier/prettier
@@ -299,6 +298,7 @@ export class Visual implements IVisual {
         } catch (e) {
             console.error('Visual::uploadDataset() error', e);
         }
+        return null;
     }
 
     private clear() {
