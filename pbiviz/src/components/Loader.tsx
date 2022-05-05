@@ -13,6 +13,7 @@ function isBindingsReady(view) {
     );
 }
 
+// tslint:disable-next-line
 function Loader({view, config, state}) {
 
     console.debug('Loader::render', { view, config, state });

@@ -1,9 +1,8 @@
 import * as React from "react";
-
 import { Loader } from './Loader';
 import { Graphistry } from './Graphistry';
 
-function Main({v, host, view, config, datasetID, state, numNodes, numEdges}) {
+function main({v, host, view, config, datasetID, state, numNodes, numEdges}) {
     console.debug('Main::render', { v, view, config, state });
     return (<>
         <Loader view={view} config={config} state={state}/>
@@ -13,4 +12,4 @@ function Main({v, host, view, config, datasetID, state, numNodes, numEdges}) {
     </>);
 }
 
-export { Main };
+export { main };

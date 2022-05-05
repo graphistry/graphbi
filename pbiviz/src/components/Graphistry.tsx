@@ -72,9 +72,9 @@ function Graphistry(
                     {...extraOpts}
                 />
                 <h3>
-                    Open in a <a onClick={() => { host.launchUrl(url); } }>new tab: {url}</a>
+                    Open in a <a href='javascript:void(0)' onClick={ () => { host.launchUrl(url); } }>new tab: {url}</a>
                 </h3>
-            </>)
+            </>);
         }
     }
 }
