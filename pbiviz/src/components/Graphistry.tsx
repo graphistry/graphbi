@@ -72,6 +72,7 @@ function Graphistry(
                     {...extraOpts}
                 />
                 <h3>
+                   {/* tslint:disable-next-line */}
                     Open in a <a href='javascript:void(0)' onClick={ () => { host.launchUrl(url); } }>new tab: {url}</a>
                 </h3>
             </>);
