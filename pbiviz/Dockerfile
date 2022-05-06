@@ -14,7 +14,7 @@ COPY package.json package-lock.json /opt/graphbi/pbiviz/
 RUN --mount=type=cache,target=/usr/src/app/.npm \
     npm set cache /usr/src/app/.npm \
     && echo "=== Installing build tools ===" \
-    && npm install --legacy-peer-deps
+    && npm install
 
 COPY \
     .stylelintrc.json \

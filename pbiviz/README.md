@@ -21,7 +21,7 @@ Creates `dist/`
 
 ### Regenerate package lock
 
-In host: `npm i --package-lock-only --legacy-peer-deps`
+In host: `npm i --package-lock-only` (Windows may need `npm i --package-lock-only --legacy-peer-deps`)
 
 (TODO: as docker cmd)
 
