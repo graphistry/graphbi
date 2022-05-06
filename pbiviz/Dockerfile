@@ -11,13 +11,13 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
 #	&& rm -rf /var/cache/apt/*
 
 COPY package.json package-lock.json /opt/graphbi/pbiviz/
-COPY  extends stylelint-config-standard
 RUN --mount=type=cache,target=/usr/src/app/.npm \
     npm set cache /usr/src/app/.npm \
     && echo "=== Installing build tools ===" \
     && npm install --legacy-peer-deps
 
 COPY \
+    .stylelintrc.json \
     .eslintrc.json .prettierrc \
     tsconfig.json tslint.json \
     capabilities.json pbiviz.json TestDataModel.pbix \
