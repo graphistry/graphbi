@@ -47,7 +47,7 @@
         "powerbi-visuals-utils-interactivityutils": "5.7.1",
         "powerbi-visuals-utils-tooltiputils": "2.5.2",
         "prettier": "2.6.2",
-        "stylelint-config-standard": "^25.0.0",
+        "stylelint-config-standard": "25.0.0",
         "tslint": "^5.20.1",
         "tslint-config-prettier": "^1.18.0",
         "tslint-microsoft-contrib": "^6.2.0",
