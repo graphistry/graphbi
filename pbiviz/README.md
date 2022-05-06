@@ -11,6 +11,14 @@ Creates `dist/`
 
 ## Develop
 
+### Generate certs for pbi
+
+* Run initial steps at https://docs.microsoft.com/en-us/power-bi/developer/visuals/create-ssl-certificate
+
+* Subsequent steps automated by `./gen_certs.sh` (check for deltas against above link if old)
+
+=> puts certs into `node_modules/powerbi-visuals-tools/certs` so docker volumes can mount them
+
 ### Regenerate package lock
 
 In host: `npm i --package-lock-only --legacy-peer-deps`
