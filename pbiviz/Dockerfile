@@ -17,10 +17,11 @@ RUN --mount=type=cache,target=/usr/src/app/.npm \
     && npm install
 
 COPY \
+    .stylelintrc.json \
     .eslintrc.json .prettierrc \
     tsconfig.json tslint.json \
     capabilities.json pbiviz.json TestDataModel.pbix \
     /opt/graphbi/pbiviz/
 COPY assets/ /opt/graphbi/pbiviz/assets/
 COPY src/ /opt/graphbi/pbiviz/src/
-COPY style/ /opt/graphbi/pbiviz/style/ 
+COPY style/ /opt/graphbi/pbiviz/style/

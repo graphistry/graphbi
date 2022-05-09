@@ -9,7 +9,7 @@
       "supportUrl": "graphistry.com",
       "gitHubUrl": "https://github.com/graphistry/graphbi"
   },
-  "apiVersion": "3.8.0",
+  "apiVersion": "4.0.0",
   "author": {
       "name": "Graphistry, Inc.",
       "email": "build@graphistry.com"
