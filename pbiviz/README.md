@@ -2,6 +2,10 @@
 
 ## Bundle
 
+1. Update `pbiviz.json`'s `displayName` with the intended version number
+
+2. Run:
+
 ```bash
 ./dc.sh build pbi
 ./bin/package.sh
