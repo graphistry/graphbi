@@ -7,7 +7,7 @@ on:
 
   workflow_dispatch:
 
-  defaults:
+defaults:
   run:
     working-directory: ./pbiviz
 
