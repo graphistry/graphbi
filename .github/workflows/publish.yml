@@ -1,0 +1,41 @@
+name: publish
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+(.*)'
+
+  workflow_dispatch:
+
+  defaults:
+  run:
+    working-directory: ./pbiviz
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    env:
+      PBI_TEST_PUBLIC_CERTIFICATE: ${{ secrets.PBI_TEST_PUBLIC_CERTIFICATE }}
+      PBI_TEST_PRIVATE_KEY: ${{ secrets.PBI_TEST_PRIVATE_KEY }}
+      CERTS_PATH: ./certs
+      DOCKER_BUILDKIT: 1
+      COMPOSE_DOCKER_CLI_BUILD: 1
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: certs
+      run: |
+        mkdir -p certs
+        echo "${PBI_TEST_PUBLIC_CERTIFICATE}" > certs/PowerBICustomVisualTest_public.crt
+        echo "${PBI_TEST_PRIVATE_KEY}" > certs/PowerBICustomVisualTest_private.key
+        touch certs/blank
+    - name: build
+      run: ./dc.sh build pbi
+    - name: lint
+      run: ./bin/lint.sh
+    - name: test
+      run: ./bin/test.sh
+    - name: bundle
+      run: ./bin/package.sh
