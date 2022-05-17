@@ -38,4 +38,12 @@ jobs:
     - name: test
       run: ./bin/test.sh
     - name: bundle
-      run: ./bin/package.sh
+      run: |
+        ./bin/package.sh
+        echo "github.ref: ${{ github.ref }}"
+        find ./dist
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: ./dist/graphbi.${{ github.ref }}.pbiviz
