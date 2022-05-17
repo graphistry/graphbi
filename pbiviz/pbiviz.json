@@ -2,7 +2,7 @@
   "visual": {
       "name": "Graphistry for PowerBI",
       "displayName": "Graphistry v4.0.5",
-      "guid": "tableExample04E649621A964F0491F29D514385D7FC",
+      "guid": "Graphistry",
       "visualClassName": "Visual",
       "version": "1.0.0",
       "description": "Graph visualization with GPU acceleration",
