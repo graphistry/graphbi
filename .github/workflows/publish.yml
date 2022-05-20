@@ -52,4 +52,4 @@ jobs:
         tag_name: ${{ env.GH_RELEASE_TAG }}
         draft: true
         token: ${{ secrets.GITHUB_TOKEN }}
-        files: ../dist/graphbi.${{ github.ref }}.pbiviz
+        files: ./dist/graphbi.${{ github.ref }}.pbiviz
