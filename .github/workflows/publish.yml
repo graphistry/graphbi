@@ -44,9 +44,9 @@ jobs:
     - name: Release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
-        with:
-          name: ${{ env.GH_RELEASE_TAG }}
-          tag_name: ${{ env.GH_RELEASE_TAG }}
-          draft: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-        files: ./dist/graphbi.${{ github.ref }}.pbiviz
+      with:
+        name: ${{ env.GH_RELEASE_TAG }}
+        tag_name: ${{ env.GH_RELEASE_TAG }}
+        draft: true
+        token: ${{ secrets.GITHUB_TOKEN }}
+      files: ./dist/graphbi.${{ github.ref }}.pbiviz
