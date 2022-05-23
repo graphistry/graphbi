@@ -42,6 +42,7 @@ jobs:
       run: |
        ./dc.sh build pbi
        echo $VERSION
+       echo “pwd: $(pwd)”
     - name: lint
       run: ./bin/lint.sh
     - name: test
