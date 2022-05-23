@@ -29,9 +29,9 @@ jobs:
        run: |
         echo "RELEASE_VERSION=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
      - name: check env
-        run: |
-          echo $RELEASE_VERSION
-          echo ${{ env.RELEASE_VERSION }}
+       run: |
+        echo $RELEASE_VERSION
+        echo ${{ env.RELEASE_VERSION }}
     - name: certs
       run: |
         mkdir -p certs
