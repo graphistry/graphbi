@@ -55,6 +55,7 @@ jobs:
         ./bin/package.sh
         echo "github.ref: ${{ github.ref }}"
         find ./dist
+        echo “pwd: $(pwd)”
     - name: Release
       uses: softprops/action-gh-release@v1
       with:
