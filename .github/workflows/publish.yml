@@ -50,8 +50,8 @@ jobs:
         find ./dist
     - name: version envvars
       run: |
-          echo "VERSION=$(cat VERSION)" >> $GITHUB_ENV
-          echo "VERSION_ENV=$(cat versions/VERSION_ENV)" >> $GITHUB_ENV
+        echo "VERSION=$(cat VERSION)" >> $GITHUB_ENV
+        echo "VERSION_ENV=$(cat versions/VERSION_ENV)" >> $GITHUB_ENV
     - name: Release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
