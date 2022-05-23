@@ -64,5 +64,5 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         files: |
            /home/runner/work/graphbi/graphbi/pbiviz/dist/graphbi.${{ github.ref }}
-           /home/runner/work/graphbi/graphbi/pbiviz/dist/Graphistry.4.0.5-8-g55e9eb2.pbiviz
+           /home/runner/work/graphbi/graphbi/pbiviz/dist/Graphistry.${{ github.ref }}.pbiviz
            /home/runner/work/graphbi/graphbi/pbiviz/dist/package.json
