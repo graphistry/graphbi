@@ -41,7 +41,7 @@ jobs:
     - name: build
       run: |
        ./dc.sh build pbi
-       echo $RELEASE_VERSION
+       echo $VERSION
     - name: lint
       run: ./bin/lint.sh
     - name: test
