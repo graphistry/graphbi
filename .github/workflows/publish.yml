@@ -25,10 +25,10 @@ jobs:
       with:
         fetch-depth: 0
     - name: get most recent tag
-       run: |
+      run: |
         echo "RELEASE_VERSION=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
     - name: check env
-       run: |
+      run: |
         echo $RELEASE_VERSION
         echo ${{ env.RELEASE_VERSION }}
     - name: certs
