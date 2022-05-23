@@ -43,6 +43,8 @@ jobs:
        ./dc.sh build pbi
        echo $VERSION
        echo “pwd: $(pwd)”
+       echo "PWD=$(ls pwd)" >> $GITHUB_ENV
+       echo ${{ env.PWD }}
     - name: lint
       run: ./bin/lint.sh
     - name: test
@@ -60,5 +62,5 @@ jobs:
         tag_name: ${{ env.RELEASE_VERSION }}
         token: ${{ secrets.GITHUB_TOKEN }}
         files: |
-           ./$(pwd)/dist/graphbi.${{ github.ref }}
-           ./$(pwd)/dist/package.json
+           ./${{ env.PWD }}/dist/graphbi.${{ github.ref }}
+           ./${{ env.PWD }}/dist/package.json
