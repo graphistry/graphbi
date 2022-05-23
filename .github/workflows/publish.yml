@@ -62,5 +62,5 @@ jobs:
         tag_name: ${{ env.RELEASE_VERSION }}
         token: ${{ secrets.GITHUB_TOKEN }}
         files: |
-           ./${{ env.pwd }}/dist/graphbi.${{ github.ref }}
-           ./${{ env.pwd }}/dist/package.json
+           /home/runner/work/graphbi/graphbi/pbiviz/dist/graphbi.${{ github.ref }}
+           /home/runner/work/graphbi/graphbi/pbiviz/dist/package.json
