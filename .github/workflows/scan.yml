@@ -3,9 +3,9 @@ on:
 
   push:
     paths: [
-      "graphbi/pbiviz/package-lock.json",
-      "graphbi/pbiviz/package.json",
-      "graphbi/pbiviz/pbiviz.json"
+      "/home/runner/work/graphbi/graphbi/graphbi/pbiviz/package-lock.json",
+     /home/runner/work/graphbi/graphbi/graphbi/pbiviz/package.json",
+      "/home/runner/work/graphbi/graphbi/graphbi/pbiviz/pbiviz.json"
     ]
     tags:
 
@@ -25,5 +25,5 @@ jobs:
           persist-credentials: false
 
       - name: pbiviz
-        working-directory: graphbi/pbiviz
+        working-directory: /home/runner/work/graphbi/graphbi/graphbi/pbiviz
         run: npm audit --production
