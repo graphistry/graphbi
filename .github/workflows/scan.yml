@@ -1,5 +1,8 @@
 name: scan
 on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ main ]
 
   push:
     paths: [
@@ -12,8 +15,6 @@ on:
 
   schedule:
     - cron: '0 8 * * *'
-
-  workflow_dispatch:
 
 jobs:
   audit:
