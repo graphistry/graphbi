@@ -9,7 +9,7 @@ on:
     ]
     tags:
 
-  #daily at 8am
+
   schedule:
     - cron: '0 8 * * *'
 
