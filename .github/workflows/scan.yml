@@ -3,9 +3,9 @@ on:
 
   push:
     paths: [
-      "./pbiviz/package-lock.json",
-      "./pbiviz/package.json",
-      "./pbiviz/pbiviz.json"
+      "graphbi/pbiviz/package-lock.json",
+      "graphbi/pbiviz/package.json",
+      "graphbi/pbiviz/pbiviz.json"
     ]
     tags:
 
