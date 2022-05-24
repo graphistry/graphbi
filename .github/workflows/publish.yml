@@ -63,6 +63,6 @@ jobs:
         tag_name: ${{ env.RELEASE_VERSION }}
         token: ${{ secrets.GITHUB_TOKEN }}
         files: |
-           /home/runner/work/graphbi/graphbi/pbiviz/dist/graphbi.${{ github.ref }}
-           /home/runner/work/graphbi/graphbi/pbiviz/dist/Graphistry.${{ VERSION }}.pbiviz
+           /home/runner/work/graphbi/graphbi/pbiviz/dist/graphbi.${{ env.RELEASE_VERSION }}
+           /home/runner/work/graphbi/graphbi/pbiviz/dist/Graphistry.${{ env.RELEASE_VERSION }}-8-g55e9eb2.pbiviz
            /home/runner/work/graphbi/graphbi/pbiviz/dist/package.json
