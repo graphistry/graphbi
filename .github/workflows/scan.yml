@@ -6,9 +6,9 @@ on:
 
   push:
     paths: [
-      "/home/runner/work/graphbi/graphbi/graphbi/pbiviz/package-lock.json",
-      "/home/runner/work/graphbi/graphbi/graphbi/pbiviz/package.json",
-      "/home/runner/work/graphbi/graphbi/graphbi/pbiviz/pbiviz.json"
+      "graphbi/pbiviz/package-lock.json",
+      "graphbi/pbiviz/package.json",
+      "graphbi/pbiviz/pbiviz.json"
     ]
     tags:
 
