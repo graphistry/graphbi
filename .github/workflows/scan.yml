@@ -26,5 +26,7 @@ jobs:
           persist-credentials: false
 
       - name: pbiviz
-        working-directory: graphbi/pbiviz
+        working-directory: |
+         graphbi/pbiviz
+         usr/bin/bash
         run: npm audit --production
