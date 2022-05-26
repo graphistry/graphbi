@@ -1,11 +1,10 @@
 name: publish
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - '[0-9]+.[0-9]+.[0-9]+(.*)'
-
-  workflow_dispatch:
 
 defaults:
   run:
@@ -13,7 +12,6 @@ defaults:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     env:
@@ -25,6 +23,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: get most recent tag
+      run: |
+        echo "RELEASE_VERSION=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
+    - name: check env
+      run: |
+        echo $RELEASE_VERSION
+        echo ${{ env.RELEASE_VERSION }}
     - name: certs
       run: |
         mkdir -p certs
@@ -32,18 +39,28 @@ jobs:
         echo "${PBI_TEST_PRIVATE_KEY}" > certs/PowerBICustomVisualTest_private.key
         touch certs/blank
     - name: build
-      run: ./dc.sh build pbi
+      run: |
+       ./dc.sh build pbi
+       echo $VERSION
+       echo “pwd: $(pwd)”
+       echo "PWD=$(pwd)" >> $GITHUB_ENV
+       echo ${{ env.pwd }}
     - name: lint
       run: ./bin/lint.sh
     - name: test
       run: ./bin/test.sh
     - name: bundle
       run: |
+        echo $RELEASE_VERSION
         ./bin/package.sh
         echo "github.ref: ${{ github.ref }}"
         find ./dist
+        echo “pwd: $(pwd)”
     - name: Release
       uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
       with:
-        files: ./dist/graphbi.${{ github.ref }}.pbiviz
+        name: ${{ env.RELEASE_VERSION }}
+        tag_name: ${{ env.RELEASE_VERSION }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        files: |
+           /home/runner/work/graphbi/graphbi/pbiviz/dist/Graphistry.${{ env.RELEASE_VERSION }}-8-g55e9eb2.pbiviz

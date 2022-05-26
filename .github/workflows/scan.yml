@@ -1,0 +1,30 @@
+name: scan
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ main ]
+
+  push:
+    paths: [
+      "/pbiviz/package-lock.json",
+      "/pbiviz/package.json",
+      "/pbiviz/pbiviz.json"
+    ]
+    tags:
+
+
+  schedule:
+    - cron: '0 8 * * *'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v2.3.1
+        with:
+          persist-credentials: false
+
+      - name: pbiviz
+        working-directory: ./pbiviz
+        run: npm audit --production
