@@ -32,7 +32,7 @@
             "displayNameKey": "Visual_DestinationProperty",
             "name": "Destination Property",
             "kind": "Grouping",
-            "displayName": "Destination node properties (ont implemented)"
+            "displayName": "Destination node properties (not implemented)"
         },
         {
             "displayNameKey": "Visual_EdgeProperty",
