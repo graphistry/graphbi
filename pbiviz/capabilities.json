@@ -355,7 +355,7 @@
                 },
                 "gravity": {
                     "displayName": "Gravity",
-                    "description": "",
+                    "description": "More compact layout",
                     "type": { "numeric": true }
                 },
                 "linLog": {
