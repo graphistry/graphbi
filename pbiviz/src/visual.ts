@@ -149,12 +149,12 @@ export class Visual implements IVisual {
     private uploadDataset(view: powerbi.DataView) {
         try {
             console.debug('@uploadDataset', { view });
-        var nodeFile = new GraphistryFile(GraphistryFileType.Node);
-        nodeFile.setData({
-            "n":["a","b","c"],
-            "v":[2,4,6],
-            "v2":["a","aa","aaa"]
-        });
+        // var nodeFile = new GraphistryFile(GraphistryFileType.Node);
+        // nodeFile.setData({
+        //     "n":["a","b","c"],
+        //     "v":[2,4,6],
+        //     "v2":["a","aa","aaa"]
+        // });
 
             const srcColMetadata = view.metadata.columns.find((c) => c.roles.Source);
             const srcColName = srcColMetadata.displayName;
