@@ -275,7 +275,7 @@ export class Visual implements IVisual {
             // this.rootElement.append('<h2>Graphistry Visual: Uploading data...</h2>');
 
             const dataset = new GraphistryDataset();
-            dataset.addFile(nodeFile);
+            // dataset.addFile(nodeFile);
             dataset.addFile(edgeFile);
             dataset.addBindings(bindings);
 
