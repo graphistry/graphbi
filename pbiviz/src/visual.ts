@@ -7,6 +7,7 @@ import '@graphistry/client-api-react/assets/index.less';
 import '../style/visual.less';
 
 import powerbi from 'powerbi-visuals-api'; // tslint:disable-line
+import { Client, EdgeFile, File, Dataset, NodeFile } from '@graphistry/client-api';
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisual = powerbi.extensibility.visual.IVisual;
@@ -30,7 +31,7 @@ export class Visual implements IVisual {
 
     private visualSettings: VisualSettings;
 
-    private client: GraphistryClient;
+    private client: Client;
 
     private reactRoot: React.ReactElement<any>;
 
@@ -48,7 +49,7 @@ export class Visual implements IVisual {
         console.debug('Visual::constructor()');
         this.host = options.host;
         // this.locale = options.host.locale;
-        this.client = new GraphistryClient();
+        this.client = new Client();
         this.rootElement = $(options.element);
         this.rootElement.append('<h2>Graphistry Visual: First set fields Source and Destination</h2>');
         this.datasetID = null;
@@ -140,7 +141,7 @@ export class Visual implements IVisual {
 
     private prevValues = {};
 
-    private prevFiles = { edgeFile: null, nodeFile: null };
+    private prevFiles = { EdgeFile: null, NodeFile: null };
 
     private prevBindings = null;
 
@@ -232,7 +233,7 @@ export class Visual implements IVisual {
             const isReusedEdgeFile = edgeFile && edgeValuesAllSame;
             console.debug('duplicate isReusedEdgeFile', isReusedEdgeFile);
             if (!isReusedEdgeFile) {
-                edgeFile = new GraphistryFile(GraphistryFileType.Edge);
+                edgeFile = new EdgeFile(); // change!
                 edgeFile.setData(edgeFileColumnValues);
                 this.prevFiles.edgeFile = edgeFile;
                 Object.assign(this.prevValues, edgeFileColumnValues);
@@ -275,10 +276,10 @@ export class Visual implements IVisual {
             // this.rootElement.empty();
             // this.rootElement.append('<h2>Graphistry Visual: Uploading data...</h2>');
 
-            const dataset = new GraphistryDataset();
+            const dataset = new Dataset(); //changed
             // dataSet.addFile(nodeFile);
-            dataset.addFile(edgeFile);
-            dataset.addBindings(bindings);
+            dataset.addFile(EdgeFile);
+            dataset.fileBindings(bindings);
 
             const numEdges = srcCol.values.length;
             console.debug('Visual::uploadDataset() edges', { numEdges });
@@ -287,7 +288,7 @@ export class Visual implements IVisual {
 
             // this.rootElement.append('Created local schema, now uploading...');
             this.previousRendered = true;
-            const uploading = dataset.getGraphUrl();
+            const uploading = dataset.datasetUrl();
             return {
                 uploading,
                 uploaded: uploading.then((datasetID) => {
@@ -371,6 +372,8 @@ export class Visual implements IVisual {
         config.PositionLockedX = this.visualSettings.positionSetting.lockedX;
         config.PositionLockedY = this.visualSettings.positionSetting.lockedY;
         config.PositionLockedRadius = this.visualSettings.positionSetting.lockedR;
+        this.client == new Client(config.UserName, config.Password, 'https', config.UrlBase, `https://${config.UrlBase}/`, this.client);
+        
 
         if (config.DatasetOverride && config.UrlBase) {
             console.debug('as DatasetOverride', { datasetOverride: config.DatasetOverride });
