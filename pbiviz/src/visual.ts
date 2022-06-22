@@ -127,11 +127,11 @@ export class Visual implements IVisual {
 
     private isReadySrcDstIframe(view) {
         console.debug('Visual::isReadySrcDstIframe()');
-        const src = view.metadata.columns.find((c) => c.roles.Source);
+        const src = view.metadata.columns.find((c) => c.roles.SourceNode);
         if (!src) {
             return false;
         }
-        const dst = view.metadata.columns.find((c) => c.roles.Destination);
+        const dst = view.metadata.columns.find((c) => c.roles.DestinationNode);
         if (!dst) {
             return false;
         }
@@ -157,10 +157,10 @@ export class Visual implements IVisual {
             "v2":["a","aa","aaa"]
         });
         */
-            const srcColMetadata = view.metadata.columns.find((c) => c.roles.Source);
+            const srcColMetadata = view.metadata.columns.find((c) => c.roles.SourceNode);
             const srcColName = srcColMetadata.displayName;
             const srcCol = view.categorical.categories.find((c) => c.source.displayName === srcColName);
-            const dstColMetadata = view.metadata.columns.find((c) => c.roles.Destination);
+            const dstColMetadata = view.metadata.columns.find((c) => c.roles.DestinationNode);
             const dstColName = dstColMetadata.displayName;
             const dstCol = view.categorical.categories.find((c) => c.source.displayName === dstColName);
             const edgePropertyMetadatas = view.metadata.columns.filter((c) => c.roles.EdgeProperty);
