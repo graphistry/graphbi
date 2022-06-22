@@ -15,8 +15,7 @@ import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
 import DataView = powerbi.DataView;
 import { VisualSettings } from './VisualSettings';
-import { GraphistryDataset } from './services/GraphistryDataset';
-import { GraphistryFile, GraphistryFileType } from './services/GraphistryFile';
+
 import { config, GraphistryClient } from './services/GraphistryClient';
 import { LoadState } from './LoadState';
 
@@ -141,7 +140,7 @@ export class Visual implements IVisual {
 
     private prevValues = {};
 
-    private prevFiles = { EdgeFile: null, NodeFile: null };
+    private prevFiles = { edgeFile: null, nodeFile: null };
 
     private prevBindings = null;
 
@@ -278,8 +277,8 @@ export class Visual implements IVisual {
 
             const dataset = new Dataset(); //changed
             // dataSet.addFile(nodeFile);
-            dataset.addFile(EdgeFile);
-            dataset.fileBindings(bindings);
+            dataset.addFile(edgeFile);
+            dataset.updateBindings(bindings);
 
             const numEdges = srcCol.values.length;
             console.debug('Visual::uploadDataset() edges', { numEdges });
@@ -288,7 +287,9 @@ export class Visual implements IVisual {
 
             // this.rootElement.append('Created local schema, now uploading...');
             this.previousRendered = true;
-            const uploading = dataset.datasetUrl();
+            console.debug('it rendered!')
+            const uploading = dataset.upload;
+            console.debug('uploading', uploading);
             return {
                 uploading,
                 uploaded: uploading.then((datasetID) => {
