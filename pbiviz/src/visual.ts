@@ -16,7 +16,7 @@ import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInst
 import DataView = powerbi.DataView;
 import { VisualSettings } from './VisualSettings';
 
-import { config, GraphistryClient } from './services/GraphistryClient';
+import { config } from './services/GraphistryClient';
 import { LoadState } from './LoadState';
 
 import { Main } from './components/Main';
@@ -43,6 +43,7 @@ export class Visual implements IVisual {
     private numNodes: number;
 
     private numEdges: number;
+
 
     constructor(options: VisualConstructorOptions) {
         console.debug('Visual::constructor()');
@@ -279,6 +280,7 @@ export class Visual implements IVisual {
             // dataSet.addFile(nodeFile);
             dataset.addFile(edgeFile);
             dataset.updateBindings(bindings);
+            console.debug('dataset', { nodeFiles: dataset.nodeFiles, edgeFiles: dataset.edgeFiles });
 
             const numEdges = srcCol.values.length;
             console.debug('Visual::uploadDataset() edges', { numEdges });
@@ -287,9 +289,9 @@ export class Visual implements IVisual {
 
             // this.rootElement.append('Created local schema, now uploading...');
             this.previousRendered = true;
-            console.debug('it rendered!')
-            const uploading = dataset.upload;
-            console.debug('uploading', uploading);
+            console.debug('Visual::uploadDataset()', { dataset });
+            const uploading = dataset.upload(this.client).then(ds => ds.datasetID); // => Promise<Dataset>
+            console.debug('uploading in background...', uploading);
             return {
                 uploading,
                 uploaded: uploading.then((datasetID) => {
@@ -373,8 +375,14 @@ export class Visual implements IVisual {
         config.PositionLockedX = this.visualSettings.positionSetting.lockedX;
         config.PositionLockedY = this.visualSettings.positionSetting.lockedY;
         config.PositionLockedRadius = this.visualSettings.positionSetting.lockedR;
-        this.client == new Client(config.UserName, config.Password, 'https', config.UrlBase, `https://${config.UrlBase}/`, this.client);
-        
+        if (this.client 
+            && this.client.checkStale(config.UserName, config.Password, 'https', config.UrlBase, `https://${config.UrlBase}/`)
+        ) {
+            console.debug('Visual::update() client is stale, resetting');
+            this.client = new Client(config.UserName, config.Password, 'https', config.UrlBase, `https://${config.UrlBase}/`);
+        } else {
+            console.debug('Visual::update() client is not stale');
+        }
 
         if (config.DatasetOverride && config.UrlBase) {
             console.debug('as DatasetOverride', { datasetOverride: config.DatasetOverride });
@@ -465,6 +473,9 @@ export class Visual implements IVisual {
                 state: this.state,
             });
             ReactDOM.render(this.reactRoot, this.target);
+        }).catch(err => {
+            console.error('Visual::uploadDataset()', err);
+            //TODO popup an error message to the user
         });
     }
 
