@@ -23,12 +23,13 @@
         "jquery": "3.6.0",
         "powerbi-visuals-api": "~4.0.0",
         "powerbi-visuals-utils-dataviewutils": "2.4.1",
-        "react": "17.0.2",
-        "react-dom": "17.0.2",
+        "react": "file:/Users/desirreeadegunle/Desktop/graphistry/graphistry-js/projects/client-api-react/node_modules/react",
+        "react-dom": "file:/Users/desirreeadegunle/Desktop/graphistry/graphistry-js/projects/client-api-react/node_modules/react-dom",
         "regenerator-runtime": "0.13.9"
     },
     "devDependencies": {
         "@types/jquery": "^3.5.9",
+        "@types/node": "^18.0.0",
         "@types/react": "17.0.37",
         "@types/react-dom": "17.0.11",
         "@typescript-eslint/eslint-plugin": "5.22.0",
