@@ -56,6 +56,7 @@ function Graphistry(
                 dissuadeHubs: config.LayoutDissuadeHubs,
                 edgeInfluence: config.LayoutEdgeInfluence,
                 strongGravity: config.LayoutStrongGravity,
+                gravity: config.LayoutGravity,
                 linLog: config.LayoutLinLog,
                 precisionVsSpeed: config.LayoutPrecisionVsSpeed,
                 scalingRatio: config.LayoutScalingRatio,
