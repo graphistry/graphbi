@@ -222,7 +222,7 @@ export class Visual implements IVisual {
                             return false;
                         }
                     }
-                    console.debug('some column values even if diff alias');
+                    console.debug('all column values same even if diff alias');
                     return true;
                 })
                 .every((check) => check);
@@ -256,11 +256,14 @@ export class Visual implements IVisual {
                         ...(config.EdgeTitle !== undefined ? { edge_title: config.EdgeTitle } : {}),
                     },
                 },
-                metadata: {},
+                metadata: this.prevBindings ? this.prevBindings.metadata || {} : {},
                 name: 'testdata',
             };
             const isReusedBindings = JSON.stringify(bindings) === JSON.stringify(this.prevBindings);
-            console.debug('duplicate isReusedBindings', isReusedBindings, { bindings, prev: this.prevBindings });
+            console.debug('duplicate isReusedBindings',
+                isReusedBindings,
+                { bindings, prev: this.prevBindings },
+                { prevStr: JSON.stringify(this.prevBindings), currStr: JSON.stringify(bindings) });
 
             // //////////////////////////////////////////////////////////////////////////////
 
