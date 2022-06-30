@@ -7,6 +7,7 @@ import '@graphistry/client-api-react/assets/index.less';
 import '../style/visual.less';
 
 import powerbi from 'powerbi-visuals-api'; // tslint:disable-line
+import { valueFormatter } from 'powerbi-visuals-utils-formattingutils';
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisual = powerbi.extensibility.visual.IVisual;
@@ -15,7 +16,6 @@ import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInst
 import DataView = powerbi.DataView;
 import DataViewMetadataColumn = powerbi.DataViewMetadataColumn;
 import DataViewCategoryColumn = powerbi.DataViewCategoryColumn;
-import { valueFormatter } from 'powerbi-visuals-utils-formattingutils';
 import { VisualSettings } from './VisualSettings';
 import { GraphistryDataset } from './services/GraphistryDataset';
 import { GraphistryFile, GraphistryFileType } from './services/GraphistryFile';
@@ -212,7 +212,7 @@ export class Visual implements IVisual {
                         );
                         return false;
                     }
-                    for (let i = 0; i < this.prevValues[colName].length; i++) {
+                    for (let i = 0; i < this.prevValues[colName].length; i += 1) {
                         // eslint-disable-line
                         if (this.prevValues[colName][i] !== edgeFileColumnValues[colName][i]) {
                             console.debug(
@@ -343,10 +343,10 @@ export class Visual implements IVisual {
     private getFlattenedColumnValues(columns: DataViewMetadataColumn[], values: DataViewCategoryColumn[]) {
         const numValues = values?.[0]?.values?.length || 0;
         const numCategories = columns?.length || 0;
-        let returnValues: string[] = [];
-        for (let vi = 0; vi < numValues; vi++) {
-            let row = [];
-            for (let ci = 0; ci < numCategories; ci++) {
+        const returnValues: string[] = [];
+        for (let vi = 0; vi < numValues; vi += 1) {
+            const row = [];
+            for (let ci = 0; ci < numCategories; ci += 1) {
                 const thisColumn = columns[ci];
                 const thisValue = values[ci].values[vi];
                 // Adjust date types correctly (sometimes they are not casted correctly depending on position in the data view)
