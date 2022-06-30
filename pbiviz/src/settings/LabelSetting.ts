@@ -5,7 +5,7 @@ export class LabelSetting {
 
     public text: powerbi.Fill = { solid: { color: '#ffffff' } };
 
-    public opacity: number | undefined = undefined;
+    public opacity: number | null = null;
 
     public showLabels: boolean = true;
 
@@ -17,5 +17,5 @@ export class LabelSetting {
 
     public showPointsOfInterestLabels: boolean = true;
 
-    public pointsOfInterestMax: number | undefined = undefined;
+    public pointsOfInterestMax: number | null = null;
 }

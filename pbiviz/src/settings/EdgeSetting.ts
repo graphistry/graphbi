@@ -1,7 +1,7 @@
 export class EdgeSetting {
-    public curvature: number | undefined = undefined;
+    public curvature: number | null = null;
 
-    public opacity: number | undefined = undefined;
+    public opacity: number | null = null;
 
     public showArrows: boolean | undefined = undefined;
 
