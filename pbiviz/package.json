@@ -23,8 +23,8 @@
         "jquery": "3.6.0",
         "powerbi-visuals-api": "~4.0.0",
         "powerbi-visuals-utils-dataviewutils": "2.4.1",
-        "react": "file:/Users/desirreeadegunle/Desktop/graphistry/graphistry-js/projects/client-api-react/node_modules/react",
-        "react-dom": "file:/Users/desirreeadegunle/Desktop/graphistry/graphistry-js/projects/client-api-react/node_modules/react-dom",
+        "react": "17.0.2",
+        "react-dom": "17.0.2",
         "regenerator-runtime": "0.13.9"
     },
     "devDependencies": {
