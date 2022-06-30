@@ -128,11 +128,11 @@ export class Visual implements IVisual {
 
     private isReadySrcDstIframe(view) {
         console.debug('Visual::isReadySrcDstIframe()');
-        const src = view.metadata.columns.find((c) => c.roles.Source);
+        const src = view.metadata.columns.find((c) => c.roles.SourceNode);
         if (!src) {
             return false;
         }
-        const dst = view.metadata.columns.find((c) => c.roles.Destination);
+        const dst = view.metadata.columns.find((c) => c.roles.DestinationNode);
         if (!dst) {
             return false;
         }
@@ -158,20 +158,19 @@ export class Visual implements IVisual {
             "v2":["a","aa","aaa"]
         });
         */
-
-            const srcColMetadata = view.metadata.columns.find((c) => c.roles.Source);
-            const srcColName = srcColMetadata.queryName;
-            const srcCol = view.categorical.categories.find((c) => c.source.queryName === srcColName);
-            const dstColMetadata = view.metadata.columns.find((c) => c.roles.Destination);
-            const dstColName = dstColMetadata.queryName;
-            const dstCol = view.categorical.categories.find((c) => c.source.queryName === dstColName);
+            const srcColMetadata = view.metadata.columns.find((c) => c.roles.SourceNode);
+            const srcColName = srcColMetadata.displayName;
+            const srcCol = view.categorical.categories.find((c) => c.source.displayName === srcColName);
+            const dstColMetadata = view.metadata.columns.find((c) => c.roles.DestinationNode);
+            const dstColName = dstColMetadata.displayName;
+            const dstCol = view.categorical.categories.find((c) => c.source.displayName === dstColName);
             const edgePropertyMetadatas = view.metadata.columns.filter((c) => c.roles.EdgeProperty);
             const edgeWeightMetadata = view.metadata.columns.find((c) => c.roles.EdgeWeight);
             // categorical.values because measure?
             const edgeWeightCol = edgeWeightMetadata
-                ? view.categorical.values.find((c) => c.source.queryName === edgeWeightMetadata.queryName)
+                ? view.categorical.values.find((c) => c.source.displayName === edgeWeightMetadata.displayName)
                 : undefined;
-            const edgeWeightColName = edgeWeightMetadata ? edgeWeightMetadata.queryName : undefined;
+            const edgeWeightColName = edgeWeightMetadata ? edgeWeightMetadata.displayName : undefined;
             console.debug('edgeWeights', { edgeWeightCol, edgeWeightColName });
 
             // upload edge values if new, else reuse edge file
@@ -182,8 +181,8 @@ export class Visual implements IVisual {
             };
             console.debug('edgeFileColumnValues', { edgeFileColumnValues });
             edgePropertyMetadatas.forEach((c) => {
-                edgeFileColumnValues[c.queryName] = view.categorical.categories.find(
-                    (c2) => c2.source.queryName === c.queryName,
+                edgeFileColumnValues[c.displayName] = view.categorical.categories.find(
+                    (c2) => c2.source.displayName === c.displayName,
                 ).values;
             });
             console.debug('with settings', { srcColName, dstColName, edgeWeightColName, edgeFileColumnValues });

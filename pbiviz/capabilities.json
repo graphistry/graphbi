@@ -2,13 +2,13 @@
     "dataRoles": [
         {
             "displayNameKey": "Visual_Source",
-            "name": "Source",
+            "name": "SourceNode",
             "kind": "Grouping",
             "displayName": "Source"
         },
         {
             "displayNameKey": "Visual_Destination",
-            "name": "Destination",
+            "name": "DestinationNode",
             "kind": "Grouping",
             "displayName": "Destination "
         },
@@ -30,9 +30,9 @@
         },
         {
             "displayNameKey": "Visual_DestinationProperty",
-            "name": "Destination Property",
+            "name": "DestinationProperty",
             "kind": "Grouping",
-            "displayName": "Destination node properties (ont implemented)"
+            "displayName": "Destination node properties (not implemented)"
         },
         {
             "displayNameKey": "Visual_EdgeProperty",
@@ -44,39 +44,21 @@
     "sorting": {
         "default": {}
     },
-    "drilldown": {
-        "roles": [
-            "Source",
-            "Target"
-        ]
-    },
     "supportsLandingPage": true,
     "supportsEmptyDataView": true,
     "dataViewMappings": [
         {
-            "conditions": [
-                {
-                    "Source": {
-                        "min": 1,
-                        "max": 1
-                    },
-                    "Destination": {
-                        "min": 1,
-                        "max": 1
-                    }
-                }
-            ],
             "categorical": {
                 "categories": {
                     "select": [
                         {
                             "for": {
-                                "in": "Source"
+                                "in": "SourceNode"
                             }
                         },
                         {
                             "for": {
-                                "in": "Destination"
+                                "in": "DestinationNode"
                             }
                         },
                         {
@@ -355,7 +337,7 @@
                 },
                 "gravity": {
                     "displayName": "Gravity",
-                    "description": "",
+                    "description": "More compact layout",
                     "type": { "numeric": true }
                 },
                 "linLog": {
