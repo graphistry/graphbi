@@ -13,6 +13,9 @@ import IVisual = powerbi.extensibility.visual.IVisual;
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
 import DataView = powerbi.DataView;
+import DataViewMetadataColumn = powerbi.DataViewMetadataColumn;
+import DataViewCategoryColumn = powerbi.DataViewCategoryColumn;
+import { valueFormatter } from 'powerbi-visuals-utils-formattingutils';
 import { VisualSettings } from './VisualSettings';
 import { GraphistryDataset } from './services/GraphistryDataset';
 import { GraphistryFile, GraphistryFileType } from './services/GraphistryFile';
@@ -157,12 +160,12 @@ export class Visual implements IVisual {
             "v2":["a","aa","aaa"]
         });
         */
-            const srcColMetadata = view.metadata.columns.find((c) => c.roles.SourceNode);
-            const srcColName = srcColMetadata.displayName;
-            const srcCol = view.categorical.categories.find((c) => c.source.displayName === srcColName);
-            const dstColMetadata = view.metadata.columns.find((c) => c.roles.DestinationNode);
-            const dstColName = dstColMetadata.displayName;
-            const dstCol = view.categorical.categories.find((c) => c.source.displayName === dstColName);
+            const srcColMetadata = view.metadata.columns.filter((c) => c.roles.SourceNode);
+            const srcColName = this.getFlattenedColumnNames(srcColMetadata);
+            const srcCol = view.categorical.categories.filter((c) => c.source.roles.SourceNode);
+            const dstColMetadata = view.metadata.columns.filter((c) => c.roles.DestinationNode);
+            const dstColName = this.getFlattenedColumnNames(dstColMetadata);
+            const dstCol = view.categorical.categories.filter((c) => c.source.roles.DestinationNode);
             const edgePropertyMetadatas = view.metadata.columns.filter((c) => c.roles.EdgeProperty);
             const edgeWeightMetadata = view.metadata.columns.find((c) => c.roles.EdgeWeight);
             // categorical.values because measure?
@@ -174,8 +177,8 @@ export class Visual implements IVisual {
 
             // upload edge values if new, else reuse edge file
             const edgeFileColumnValues = {
-                [srcColName]: srcCol.values,
-                [dstColName]: dstCol.values,
+                [srcColName]: this.getFlattenedColumnValues(srcColMetadata, srcCol),
+                [dstColName]: this.getFlattenedColumnValues(dstColMetadata, dstCol),
                 ...(edgeWeightMetadata ? { [edgeWeightColName]: edgeWeightCol.values } : {}),
             };
             console.debug('edgeFileColumnValues', { edgeFileColumnValues });
@@ -209,7 +212,8 @@ export class Visual implements IVisual {
                         );
                         return false;
                     }
-                    for (let i = 0; i < this.prevValues[colName].length; i++) {  // eslint-disable-line
+                    for (let i = 0; i < this.prevValues[colName].length; i++) {
+                        // eslint-disable-line
                         if (this.prevValues[colName][i] !== edgeFileColumnValues[colName][i]) {
                             console.debug(
                                 'delta on i',
@@ -279,9 +283,9 @@ export class Visual implements IVisual {
             dataset.addFile(edgeFile);
             dataset.addBindings(bindings);
 
-            const numEdges = srcCol.values.length;
+            const numEdges = srcCol[0].values.length;
             console.debug('Visual::uploadDataset() edges', { numEdges });
-            const numNodes = new Set(srcCol.values.concat(dstCol.values)).size;
+            const numNodes = new Set(srcCol[0].values.concat(dstCol[0].values)).size;
             console.debug('Visual::uploadDataset() nodes', { numNodes });
 
             // this.rootElement.append('Created local schema, now uploading...');
@@ -313,6 +317,46 @@ export class Visual implements IVisual {
             state: this.state,
         });
         ReactDOM.render(this.reactRoot, this.target);
+    }
+
+    /**
+     * Consolidates logic to flatten column names and column values with the
+     * same delimeter.
+     */
+    private getFlattenedValues(values: string[]): string {
+        return values.join(',');
+    }
+
+    /**
+     * For the supplied column metadata, consolidate their names with a
+     * delimeter.
+     */
+    private getFlattenedColumnNames(metadata: DataViewMetadataColumn[]) {
+        return this.getFlattenedValues(metadata.map((m) => m.displayName));
+    }
+
+    /**
+     * Traverse the supplied column metadata and corresponding values, to
+     * produce a flattened list of column values. This also ensures that any
+     * format specifiers from the column metadata are applied to the values.
+     */
+    private getFlattenedColumnValues(columns: DataViewMetadataColumn[], values: DataViewCategoryColumn[]) {
+        const numValues = values?.[0]?.values?.length || 0;
+        const numCategories = columns?.length || 0;
+        let returnValues: string[] = [];
+        for (let vi = 0; vi < numValues; vi++) {
+            let row = [];
+            for (let ci = 0; ci < numCategories; ci++) {
+                const thisColumn = columns[ci];
+                const thisValue = values[ci].values[vi];
+                // Adjust date types correctly (sometimes they are not casted correctly depending on position in the data view)
+                const valueToFormat =
+                    thisColumn.type.dateTime && thisValue !== typeof Date ? new Date(<string>thisValue) : thisValue;
+                row.push(valueFormatter.format(valueToFormat, thisColumn.format));
+            }
+            returnValues.push(this.getFlattenedValues(row));
+        }
+        return returnValues;
     }
 
     public update(options: VisualUpdateOptions, viewModel) {
