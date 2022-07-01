@@ -11,5 +11,5 @@ export class LayoutSetting {
 
     public precisionVsSpeed: number | null = null;
 
-    public scalingRatio: number |  null =  null;
+    public scalingRatio: number | null = null;
 }

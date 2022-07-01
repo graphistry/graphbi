@@ -7,7 +7,7 @@ import '@graphistry/client-api-react/assets/index.less';
 import '../style/visual.less';
 
 import powerbi from 'powerbi-visuals-api'; // tslint:disable-line
-import { Client, EdgeFile, File, Dataset, NodeFile } from '@graphistry/client-api';
+import { Client, EdgeFile, File, Dataset, NodeFile } from '@graphistry/client-api'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisual = powerbi.extensibility.visual.IVisual;
@@ -43,7 +43,6 @@ export class Visual implements IVisual {
     private numNodes: number;
 
     private numEdges: number;
-
 
     constructor(options: VisualConstructorOptions) {
         console.debug('Visual::constructor()');
@@ -259,10 +258,12 @@ export class Visual implements IVisual {
                 name: 'testdata',
             };
             const isReusedBindings = JSON.stringify(bindings) === JSON.stringify(this.prevBindings);
-            console.debug('duplicate isReusedBindings',
+            console.debug(
+                'duplicate isReusedBindings',
                 isReusedBindings,
                 { bindings, prev: this.prevBindings },
-                { prevStr: JSON.stringify(this.prevBindings), currStr: JSON.stringify(bindings) });
+                { prevStr: JSON.stringify(this.prevBindings), currStr: JSON.stringify(bindings) },
+            );
 
             // //////////////////////////////////////////////////////////////////////////////
 
@@ -278,7 +279,7 @@ export class Visual implements IVisual {
             // this.rootElement.empty();
             // this.rootElement.append('<h2>Graphistry Visual: Uploading data...</h2>');
 
-            const dataset = new Dataset(); //changed
+            const dataset = new Dataset(); // changed
             // dataSet.addFile(nodeFile);
             dataset.addFile(edgeFile);
             dataset.updateBindings(bindings);
@@ -292,7 +293,7 @@ export class Visual implements IVisual {
             // this.rootElement.append('Created local schema, now uploading...');
             this.previousRendered = true;
             console.debug('Visual::uploadDataset()', { dataset });
-            const uploading = dataset.upload(this.client).then(ds => ds.datasetID); // => Promise<Dataset>
+            const uploading = dataset.upload(this.client).then((ds) => ds.datasetID); // => Promise<Dataset>
             console.debug('uploading in background...', uploading);
             return {
                 uploading,
@@ -377,11 +378,16 @@ export class Visual implements IVisual {
         config.PositionLockedX = this.visualSettings.positionSetting.lockedX;
         config.PositionLockedY = this.visualSettings.positionSetting.lockedY;
         config.PositionLockedRadius = this.visualSettings.positionSetting.lockedR;
-        if (this.client 
-            && this.client.checkStale(config.UserName, config.Password, 'https', config.UrlBase, `https://${config.UrlBase}/`)
+        if (this.client && this.client.checkStale(config.UserName, config.Password, 'https', config.UrlBase, `https://${config.UrlBase}/`) // eslint-disable-line
         ) {
             console.debug('Visual::update() client is stale, resetting');
-            this.client = new Client(config.UserName, config.Password, 'https', config.UrlBase, `https://${config.UrlBase}/`);
+            this.client = new Client(
+                config.UserName,
+                config.Password,
+                'https',
+                config.UrlBase,
+                `https://${config.UrlBase}/`,
+            );
         } else {
             console.debug('Visual::update() client is not stale');
         }
@@ -459,26 +465,27 @@ export class Visual implements IVisual {
             });
             ReactDOM.render(this.reactRoot, this.target);
         }
-        uploaded.then(({ datasetID, numEdges, numNodes }) => {
-            this.state = LoadState.UPLOADED;
-            this.numNodes = numNodes;
-            this.numEdges = numEdges;
-            this.datasetID = datasetID;
-            this.reactRoot = <React.ReactElement<any>>React.createElement(Main, {
-                host: this.host,
-                numNodes: this.numNodes,
-                numEdges: this.numEdges,
-                v: `updated uploaded: ${Date.now()}`,
-                view,
-                config,
-                datasetID: this.datasetID,
-                state: this.state,
+            uploaded.then(({ datasetID, numEdges, numNodes }) => { // eslint-disable-line   
+                this.state = LoadState.UPLOADED;
+                this.numNodes = numNodes;
+                this.numEdges = numEdges;
+                this.datasetID = datasetID;
+                this.reactRoot = <React.ReactElement<any>>React.createElement(Main, {
+                    host: this.host,
+                    numNodes: this.numNodes,
+                    numEdges: this.numEdges,
+                    v: `updated uploaded: ${Date.now()}`,
+                    view,
+                    config,
+                    datasetID: this.datasetID,
+                    state: this.state,
+                });
+                ReactDOM.render(this.reactRoot, this.target);
+            })
+            .catch((err) => {
+                console.error('Visual::uploadDataset()', err);
+                // TODO popup an error message to the user
             });
-            ReactDOM.render(this.reactRoot, this.target);
-        }).catch(err => {
-            console.error('Visual::uploadDataset()', err);
-            //TODO popup an error message to the user
-        });
     }
 
     public destroy(): void {
