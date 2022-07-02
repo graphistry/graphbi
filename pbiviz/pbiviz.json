@@ -4,7 +4,7 @@
         "displayName": "Graphistry 4.0.6-8-g55e9eb2",
         "guid": "Graphistry",
         "visualClassName": "Visual",
-        "version": "4.0.6-8-g55e9eb2",
+        "version": "4.0.6-8-g55e9eb2.pbiviz",
         "description": "Graph visualization with GPU acceleration",
         "supportUrl": "graphistry.com",
         "gitHubUrl": "https://github.com/graphistry/graphbi"
