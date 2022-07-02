@@ -15,7 +15,7 @@
         "prettier:fix": "prettier --write \"src/**/*.ts\"",
         "start": "pbiviz start",
         "test": "pbiviz package --resources --no-minify --no-pbiviz",
-        "tslint-check": "tslint-config-prettier-check ./tslint.json"
+        "version:update": "export RELEASE_VERSION=${RELEASE_VERSION:-dev} && echo \"Rewriting pbiviz.json.template->pbiviz.json using RELEASE_VERSION: $RELEASE_VERSION\" && envsubst '$RELEASE_VERSION' < pbiviz.json.template > pbiviz.json"
     },
     "dependencies": {
         "@graphistry/client-api": "4.1.5",

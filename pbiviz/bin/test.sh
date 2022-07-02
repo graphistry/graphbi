@@ -4,7 +4,7 @@
 # Generates dist/???
 
 
-APP_BUILD_TAG=`cat VERSION`
+APP_BUILD_TAG=${APP_BUILD_TAG:-$(./bin/print-tag.sh)}
 
 mkdir -p dist
 docker run \
