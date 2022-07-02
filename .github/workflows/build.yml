@@ -3,9 +3,7 @@ name: "build"
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
   pull_request:
-    branches: [ main ]
   schedule:
     - cron: '20 13 * * 2'
 
