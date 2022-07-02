@@ -1,10 +1,10 @@
 {
     "visual": {
         "name": "Graphistry for PowerBI",
-        "displayName": "Graphistry $VERSION",
+        "displayName": "Graphistry $RELEASE_VERSION",
         "guid": "Graphistry",
         "visualClassName": "Visual",
-        "version": "$VERSION",
+        "version": "$RELEASE_VERSION",
         "description": "Graph visualization with GPU acceleration",
         "supportUrl": "graphistry.com",
         "gitHubUrl": "https://github.com/graphistry/graphbi"
