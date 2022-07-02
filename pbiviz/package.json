@@ -18,8 +18,8 @@
         "tslint-check": "tslint-config-prettier-check ./tslint.json"
     },
     "dependencies": {
-        "@graphistry/client-api": "4.1.4",
-        "@graphistry/client-api-react": "4.1.4",
+        "@graphistry/client-api": "4.1.5",
+        "@graphistry/client-api-react": "4.1.5",
         "jquery": "3.6.0",
         "powerbi-visuals-api": "~4.0.0",
         "powerbi-visuals-utils-dataviewutils": "2.4.1",
