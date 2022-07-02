@@ -25,6 +25,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     - name: certs
       run: |
         mkdir -p certs
