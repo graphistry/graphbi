@@ -7,11 +7,8 @@ import '@graphistry/client-api-react/assets/index.less';
 import '../style/visual.less';
 
 import powerbi from 'powerbi-visuals-api'; // tslint:disable-line
-<<<<<<< HEAD
 import { Client, EdgeFile, File, Dataset, NodeFile } from '@graphistry/client-api'; // eslint-disable-line @typescript-eslint/no-unused-vars
-=======
 import { valueFormatter } from 'powerbi-visuals-utils-formattingutils';
->>>>>>> dm-p
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisual = powerbi.extensibility.visual.IVisual;
