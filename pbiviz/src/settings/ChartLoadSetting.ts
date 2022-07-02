@@ -1,5 +1,5 @@
 export class ChartLoadSetting {
-    public play: number | undefined = undefined;
+    public play: number | null = null;
 
     public showSplashScreen: boolean = false;
 }

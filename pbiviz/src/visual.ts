@@ -7,6 +7,7 @@ import '@graphistry/client-api-react/assets/index.less';
 import '../style/visual.less';
 
 import powerbi from 'powerbi-visuals-api'; // tslint:disable-line
+import { Client, EdgeFile, File, Dataset, NodeFile } from '@graphistry/client-api'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { valueFormatter } from 'powerbi-visuals-utils-formattingutils';
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
@@ -17,9 +18,8 @@ import DataView = powerbi.DataView;
 import DataViewMetadataColumn = powerbi.DataViewMetadataColumn;
 import DataViewCategoryColumn = powerbi.DataViewCategoryColumn;
 import { VisualSettings } from './VisualSettings';
-import { GraphistryDataset } from './services/GraphistryDataset';
-import { GraphistryFile, GraphistryFileType } from './services/GraphistryFile';
-import { config, GraphistryClient } from './services/GraphistryClient';
+
+import { config } from './services/GraphistryClient';
 import { LoadState } from './LoadState';
 
 import { Main } from './components/Main';
@@ -33,7 +33,7 @@ export class Visual implements IVisual {
 
     private visualSettings: VisualSettings;
 
-    private client: GraphistryClient;
+    private client: Client;
 
     private reactRoot: React.ReactElement<any>;
 
@@ -51,7 +51,7 @@ export class Visual implements IVisual {
         console.debug('Visual::constructor()');
         this.host = options.host;
         // this.locale = options.host.locale;
-        this.client = new GraphistryClient();
+        this.client = new Client();
         this.rootElement = $(options.element);
         this.rootElement.append('<h2>Graphistry Visual: First set fields Source and Destination</h2>');
         this.datasetID = null;
@@ -224,7 +224,7 @@ export class Visual implements IVisual {
                             return false;
                         }
                     }
-                    console.debug('some column values even if diff alias');
+                    console.debug('all column values same even if diff alias');
                     return true;
                 })
                 .every((check) => check);
@@ -235,7 +235,7 @@ export class Visual implements IVisual {
             const isReusedEdgeFile = edgeFile && edgeValuesAllSame;
             console.debug('duplicate isReusedEdgeFile', isReusedEdgeFile);
             if (!isReusedEdgeFile) {
-                edgeFile = new GraphistryFile(GraphistryFileType.Edge);
+                edgeFile = new EdgeFile(); // change!
                 edgeFile.setData(edgeFileColumnValues);
                 this.prevFiles.edgeFile = edgeFile;
                 Object.assign(this.prevValues, edgeFileColumnValues);
@@ -258,11 +258,16 @@ export class Visual implements IVisual {
                         ...(config.EdgeTitle !== undefined ? { edge_title: config.EdgeTitle } : {}),
                     },
                 },
-                metadata: {},
+                metadata: this.prevBindings ? this.prevBindings.metadata || {} : {},
                 name: 'testdata',
             };
             const isReusedBindings = JSON.stringify(bindings) === JSON.stringify(this.prevBindings);
-            console.debug('duplicate isReusedBindings', isReusedBindings, { bindings, prev: this.prevBindings });
+            console.debug(
+                'duplicate isReusedBindings',
+                isReusedBindings,
+                { bindings, prev: this.prevBindings },
+                { prevStr: JSON.stringify(this.prevBindings), currStr: JSON.stringify(bindings) },
+            );
 
             // //////////////////////////////////////////////////////////////////////////////
 
@@ -278,10 +283,11 @@ export class Visual implements IVisual {
             // this.rootElement.empty();
             // this.rootElement.append('<h2>Graphistry Visual: Uploading data...</h2>');
 
-            const dataset = new GraphistryDataset();
-            // dataset.addFile(nodeFile);
+            const dataset = new Dataset(); // changed
+            // dataSet.addFile(nodeFile);
             dataset.addFile(edgeFile);
-            dataset.addBindings(bindings);
+            dataset.updateBindings(bindings);
+            console.debug('dataset', { nodeFiles: dataset.nodeFiles, edgeFiles: dataset.edgeFiles });
 
             const numEdges = srcCol[0].values.length;
             console.debug('Visual::uploadDataset() edges', { numEdges });
@@ -290,7 +296,9 @@ export class Visual implements IVisual {
 
             // this.rootElement.append('Created local schema, now uploading...');
             this.previousRendered = true;
-            const uploading = dataset.getGraphUrl();
+            console.debug('Visual::uploadDataset()', { dataset });
+            const uploading = dataset.upload(this.client).then((ds) => ds.datasetID); // => Promise<Dataset>
+            console.debug('uploading in background...', uploading);
             return {
                 uploading,
                 uploaded: uploading.then((datasetID) => {
@@ -414,6 +422,19 @@ export class Visual implements IVisual {
         config.PositionLockedX = this.visualSettings.positionSetting.lockedX;
         config.PositionLockedY = this.visualSettings.positionSetting.lockedY;
         config.PositionLockedRadius = this.visualSettings.positionSetting.lockedR;
+        if (this.client && this.client.checkStale(config.UserName, config.Password, 'https', config.UrlBase, `https://${config.UrlBase}/`) // eslint-disable-line
+        ) {
+            console.debug('Visual::update() client is stale, resetting');
+            this.client = new Client(
+                config.UserName,
+                config.Password,
+                'https',
+                config.UrlBase,
+                `https://${config.UrlBase}/`,
+            );
+        } else {
+            console.debug('Visual::update() client is not stale');
+        }
 
         if (config.DatasetOverride && config.UrlBase) {
             console.debug('as DatasetOverride', { datasetOverride: config.DatasetOverride });
@@ -488,23 +509,27 @@ export class Visual implements IVisual {
             });
             ReactDOM.render(this.reactRoot, this.target);
         }
-        uploaded.then(({ datasetID, numEdges, numNodes }) => {
-            this.state = LoadState.UPLOADED;
-            this.numNodes = numNodes;
-            this.numEdges = numEdges;
-            this.datasetID = datasetID;
-            this.reactRoot = <React.ReactElement<any>>React.createElement(Main, {
-                host: this.host,
-                numNodes: this.numNodes,
-                numEdges: this.numEdges,
-                v: `updated uploaded: ${Date.now()}`,
-                view,
-                config,
-                datasetID: this.datasetID,
-                state: this.state,
+            uploaded.then(({ datasetID, numEdges, numNodes }) => { // eslint-disable-line   
+                this.state = LoadState.UPLOADED;
+                this.numNodes = numNodes;
+                this.numEdges = numEdges;
+                this.datasetID = datasetID;
+                this.reactRoot = <React.ReactElement<any>>React.createElement(Main, {
+                    host: this.host,
+                    numNodes: this.numNodes,
+                    numEdges: this.numEdges,
+                    v: `updated uploaded: ${Date.now()}`,
+                    view,
+                    config,
+                    datasetID: this.datasetID,
+                    state: this.state,
+                });
+                ReactDOM.render(this.reactRoot, this.target);
+            })
+            .catch((err) => {
+                console.error('Visual::uploadDataset()', err);
+                // TODO popup an error message to the user
             });
-            ReactDOM.render(this.reactRoot, this.target);
-        });
     }
 
     public destroy(): void {

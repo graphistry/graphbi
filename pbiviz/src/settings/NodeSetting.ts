@@ -1,7 +1,7 @@
 export class NodeSetting {
-    public opacity: number | undefined = undefined;
+    public opacity: number | null = null;
 
-    public size: number | undefined = undefined;
+    public size: number | null = null;
 
     public title: string | undefined = '';
 }

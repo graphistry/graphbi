@@ -1,7 +1,7 @@
 export class PositionSetting {
-    public positionX: number | undefined = undefined;
+    public positionX: number | null = null;
 
-    public positionY: number | undefined = undefined;
+    public positionY: number | null = null;
 
     public lockedX: boolean = false;
 
