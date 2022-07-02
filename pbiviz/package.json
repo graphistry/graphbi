@@ -8,7 +8,7 @@
         "lint": "npm run eslint && npm run lint:ts && npm run lint:less",
         "lint:ts": "node node_modules/tslint/bin/tslint -r \"node_modules/tslint-microsoft-contrib\" \"+(src|test)/**/*.ts?\"",
         "lint:less": "stylelint \"style/**/*.less\"",
-        "lock:fix": "npm i --package-lock-only",
+        "lock:fix": "npm i --package-lock-only --legacy-peer-deps",
         "package": "pbiviz package",
         "pbiviz": "pbiviz",
         "prettier": "prettier \"src/**/*.ts\"",
