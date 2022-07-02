@@ -63,5 +63,5 @@ jobs:
         tag_name: ${{ env.RELEASE_VERSION }}
         token: ${{ secrets.GITHUB_TOKEN }}
         files: |
-          Graphistry.${{ env.RELEASE_VERSION }}.pbiviz
-          
+          ./home/runner/work/graphbi/graphbi/pbiviz/dist/Graphistry.${{ env.RELEASE_VERSION }}.pbiviz
+        
