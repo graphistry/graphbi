@@ -8,18 +8,18 @@
         "lint": "npm run eslint && npm run lint:ts && npm run lint:less",
         "lint:ts": "node node_modules/tslint/bin/tslint -r \"node_modules/tslint-microsoft-contrib\" \"+(src|test)/**/*.ts?\"",
         "lint:less": "stylelint \"style/**/*.less\"",
-        "lock:fix": "npm i --package-lock-only",
+        "lock:fix": "npm i --package-lock-only --legacy-peer-deps",
         "package": "pbiviz package",
         "pbiviz": "pbiviz",
         "prettier": "prettier \"src/**/*.ts\"",
         "prettier:fix": "prettier --write \"src/**/*.ts\"",
         "start": "pbiviz start",
         "test": "pbiviz package --resources --no-minify --no-pbiviz",
-        "tslint-check": "tslint-config-prettier-check ./tslint.json"
+        "version:update": "export RELEASE_VERSION=${RELEASE_VERSION:-dev} && echo \"Rewriting pbiviz.json.template->pbiviz.json using RELEASE_VERSION: $RELEASE_VERSION\" && envsubst '$RELEASE_VERSION' < pbiviz.json.template > pbiviz.json"
     },
     "dependencies": {
-        "@graphistry/client-api": "4.1.4",
-        "@graphistry/client-api-react": "4.1.4",
+        "@graphistry/client-api": "4.1.5",
+        "@graphistry/client-api-react": "4.1.5",
         "jquery": "3.6.0",
         "powerbi-visuals-api": "~4.0.0",
         "powerbi-visuals-utils-dataviewutils": "2.4.1",
@@ -30,7 +30,7 @@
     "devDependencies": {
         "@types/jquery": "^3.5.9",
         "@types/node": "^18.0.0",
-        "@types/react": "17.0.37",
+        "@types/react": "17.0.39",
         "@types/react-dom": "17.0.11",
         "@typescript-eslint/eslint-plugin": "5.22.0",
         "@typescript-eslint/parser": "5.22.0",

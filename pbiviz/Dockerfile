@@ -6,7 +6,9 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     apt-get update \
 	&& apt-get install -y \
         curl \
+        gettext \
         openssl
+
 #	&& rm -rf /var/lib/apt/lists/* \
 #	&& rm -rf /var/cache/apt/*
 
@@ -17,10 +19,17 @@ RUN --mount=type=cache,target=/usr/src/app/.npm \
     && npm install
 
 COPY \
+    pbiviz.json pbiviz.json.template \
+    /opt/graphbi/pbiviz/
+RUN npm run version:update
+
+COPY \
+    .eslintrc.json \
+    .prettierrc \
     .stylelintrc.json \
-    .eslintrc.json .prettierrc \
+    capabilities.json \
     tsconfig.json tslint.json \
-    capabilities.json pbiviz.json TestDataModel.pbix \
+    TestDataModel.pbix \
     /opt/graphbi/pbiviz/
 COPY assets/ /opt/graphbi/pbiviz/assets/
 COPY src/ /opt/graphbi/pbiviz/src/

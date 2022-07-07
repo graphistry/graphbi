@@ -65,6 +65,27 @@ Create PowerBI dev account:
 * in a report (ex: HR), add a Developer visuals
 * it will show a greyed component with "Can't contact visual server"
 
+### Versions
+
+Version numbers are automatically taken from the latest git tag, and sometimes with suffix `-dev`.
+
+Use environment variables to override how it is used for base docker images and/or published package versions. Read scripts to see which are used and how.
+
+
+## Publish
+
+* Update `CHANGELOG.md` with intended version number
+* Merge your PR and ensure CI passes
+* From `main` branch:
+
+```bash
+git tag X.Y.Z
+git push --tags
+```
+
+This will create a new tag and release: https://github.com/graphistry/graphbi/releases
+
+
 #### OS X
 
 
