@@ -52,7 +52,7 @@ jobs:
     - name: bundle
       run: |
         echo $RELEASE_VERSION
-        ./bin/package.sh
+        VERSION=$RELEASE_VERSION ./bin/package.sh
         echo "github.ref: ${{ github.ref }}"
         find ./dist
         echo “pwd: $(pwd)”
@@ -63,4 +63,5 @@ jobs:
         tag_name: ${{ env.RELEASE_VERSION }}
         token: ${{ secrets.GITHUB_TOKEN }}
         files: |
-           /home/runner/work/graphbi/graphbi/pbiviz/dist/Graphistry.${{ env.RELEASE_VERSION }}-8-g55e9eb2.pbiviz
+          /home/runner/work/graphbi/graphbi/pbiviz/dist/Graphistry.${{ env.RELEASE_VERSION }}.pbiviz
+  

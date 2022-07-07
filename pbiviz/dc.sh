@@ -23,10 +23,13 @@ if [ ! -d "${CERTS_PATH}" ]; then
   exit 1
 fi
 
+VERSION=$(./bin/print-tag.sh)
+echo "using version ${VERSION}"
+
 CERTS_PATH="${CERTS_PATH}" \
 PYTHONPATH="${PYTHONPATH}" \
-APP_BUILD_TAG=`cat VERSION` \
-VERSION=`cat VERSION` \
+APP_BUILD_TAG=$VERSION \
+RELEASE_VERSION=$VERSION \
 COMPOSE_DOCKER_CLI_BUILD=1 \
 DOCKER_BUILDKIT=1 \
 docker-compose \

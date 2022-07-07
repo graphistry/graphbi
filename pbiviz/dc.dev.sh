@@ -15,10 +15,13 @@ if [ ! -d "${CERTS_PATH}" ]; then
   exit 1
 fi
 
+VERSION=$(./bin/print-tag.sh)
+echo "using base version ${VERSION} (dev: ...-dev)"
+
 CERTS_PATH="${CERTS_PATH}" \
 PYTHONPATH="${PYTHONPATH}" \
-APP_BUILD_TAG=`cat VERSION`-dev \
-VERSION=`cat VERSION` \
+APP_BUILD_TAG="${VERSION}-dev" \
+RELEASE_VERSION=$VERSION \
 docker-compose \
   -f docker-compose.dev.yml \
   $@

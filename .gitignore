@@ -6,3 +6,4 @@ dist
 .api
 
 webpack.statistics.*.html
+pbiviz/pbiviz.json
