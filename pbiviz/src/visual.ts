@@ -17,6 +17,14 @@ import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInst
 import DataView = powerbi.DataView;
 import DataViewMetadataColumn = powerbi.DataViewMetadataColumn;
 import DataViewCategoryColumn = powerbi.DataViewCategoryColumn;
+//popup/dialog stuff
+import DialogAction = powerbi.DialogAction;
+import DialogOpenOptions = powerbi.extensibility.visual.DialogOpenOptions;
+import RectSize = powerbi.extensibility.visual.RectSize;
+import VisualDialogPosition = powerbi.extensibility.visual.VisualDialogPosition;
+import VisualDialogPositionType = powerbi.VisualDialogPositionType;
+import ModalDialogResult = powerbi.extensibility.visual.ModalDialogResult;
+import { PopUp, DialogState } from "./components/PopUp";
 import { VisualSettings } from './VisualSettings';
 
 import { config } from './services/GraphistryClient';
@@ -47,6 +55,14 @@ export class Visual implements IVisual {
 
     private numEdges: number;
 
+    private updateCount: number;
+
+    private textNode: Text;
+
+    private dialogActionsButtons = [DialogAction.OK, DialogAction.Cancel];
+
+    private loginButton = [DialogAction.LOGIN]; // not working yet 
+
     constructor(options: VisualConstructorOptions) {
         console.debug('Visual::constructor()');
         this.host = options.host;
@@ -57,7 +73,6 @@ export class Visual implements IVisual {
         this.datasetID = null;
         this.numNodes = undefined;
         this.numEdges = undefined;
-
         this.visualSettings = <VisualSettings>VisualSettings.getDefault();
 
         this.state = LoadState.MISCONFIGURED;
@@ -76,7 +91,66 @@ export class Visual implements IVisual {
         ReactDOM.render(this.reactRoot, this.target);
 
         console.debug('////constructed');
+
+        this.updateCount = 0;
+        if (document) {
+         const new_p: HTMLElement = document.createElement("p");
+        new_p.appendChild(
+        document.createTextNode(
+          "Click to log in to Graphistry"
+        )
+      );
+        const new_em: HTMLElement = document.createElement("em");
+        this.textNode = document.createTextNode(this.updateCount.toString());
+        new_em.appendChild(this.textNode);
+        new_p.appendChild(new_em);
+        this.target.appendChild(new_p);
+      // bind simple dialog handling to main element (click)
+        this.handleDialogEvent();
     }
+}
+ /**
+   * Binds logic to the click event for the main element. This will open a
+   * simple dialog and pass in the current update count.
+   */
+  private handleDialogEvent() {
+    this.target.onclick = (event) => {
+      const dialogActionButtons = [DialogAction.OK];
+      const dialogStateInitial: DialogState = { count: this.updateCount };
+      const position: VisualDialogPosition = {
+        type: VisualDialogPositionType.RelativeToVisual,
+        left: 100,
+        top: 30,
+      };
+      const size: RectSize = { width: 250, height: 300 };
+      const dialogOptions: DialogOpenOptions = {
+        actionButtons: dialogActionButtons,
+        size: size,
+        position: position,
+        title: `Test SSO`,
+      };
+
+      this.host
+        .openModalDialog(PopUp.id, dialogOptions, dialogStateInitial)
+        .then((ret) => this.handleDialogResult(ret));
+    };
+  }
+
+  
+
+    /**
+    * When the dialog is closed, we will udpate the current count value returned
+    * from the dialog logic.
+    */
+   private handleDialogResult(ret: ModalDialogResult): void {
+     const count = (<DialogState>ret.resultState).count;
+     this.updateCount = count;
+     this.textNode.textContent = `${count}`;
+   }
+
+   private static parseSettings(dataView: DataView): VisualSettings {
+    return <VisualSettings>VisualSettings.parse(dataView);
+  }
 
     public createViewModel(dataView: DataView): VisualSettings {
         console.debug('Visual::createViewModel()', { dataView });
@@ -531,6 +605,12 @@ export class Visual implements IVisual {
                 // TODO popup an error message to the user
             });
     }
+
+
+    private dialogActionsButtons = [DialogAction.OK, DialogAction.Cancel];
+
+    private loginButton = [DialogAction.LOGIN];
+
 
     public destroy(): void {
         // Perform any cleanup tasks here
