@@ -50,6 +50,11 @@
         {
             "categorical": {
                 "categories": {
+                    "dataReductionAlgorithm": {
+                        "top": {
+                            "count": 30000
+                        }
+                    },
                     "select": [
                         {
                             "for": {
