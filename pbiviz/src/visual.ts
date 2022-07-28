@@ -350,9 +350,7 @@ export class Visual implements IVisual {
     ) {
         const combined = columns.map((c, ci) => ({
             key: `${type} ${c.displayName}`,
-            value: values[ci].values.map((v) => {
-                return this.formatPrimitiveValue(v, c);
-            }),
+            value: values[ci].values.map((v) => this.formatPrimitiveValue(v, c)),
         }));
         return combined.reduce((obj, item) => Object.assign(obj, { [item.key]: item.value }), {});
     }
