@@ -17,6 +17,7 @@ import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInst
 import DataView = powerbi.DataView;
 import DataViewMetadataColumn = powerbi.DataViewMetadataColumn;
 import DataViewCategoryColumn = powerbi.DataViewCategoryColumn;
+import PrimitiveValue = powerbi.PrimitiveValue;
 import { VisualSettings } from './VisualSettings';
 
 import { config } from './services/GraphistryClient';
@@ -174,11 +175,21 @@ export class Visual implements IVisual {
                 : undefined;
             const edgeWeightColName = edgeWeightMetadata ? edgeWeightMetadata.displayName : undefined;
             console.debug('edgeWeights', { edgeWeightCol, edgeWeightColName });
+            const sourcePropertyMetadata = view.metadata.columns.filter((c) => c.roles.SourceProperty);
+            const sourcePropertyValues = view.categorical.categories.filter((c) => c.source.roles.SourceProperty);
+            console.debug('Source properties', { sourcePropertyMetadata, sourcePropertyValues });
+            const destinationPropertyMetadata = view.metadata.columns.filter((c) => c.roles.DestinationProperty);
+            const destinationPropertyValues = view.categorical.categories.filter(
+                (c) => c.source.roles.DestinationProperty,
+            );
+            console.debug('Destination properties', { destinationPropertyMetadata, destinationPropertyValues });
 
             // upload edge values if new, else reuse edge file
             const edgeFileColumnValues = {
                 [srcColName]: this.getFlattenedColumnValues(srcColMetadata, srcCol),
                 [dstColName]: this.getFlattenedColumnValues(dstColMetadata, dstCol),
+                ...this.getEdgeValuesByType(sourcePropertyMetadata, sourcePropertyValues, 'Source'),
+                ...this.getEdgeValuesByType(destinationPropertyMetadata, destinationPropertyValues, 'Destination'),
                 ...(edgeWeightMetadata ? { [edgeWeightColName]: edgeWeightCol.values } : {}),
             };
             console.debug('edgeFileColumnValues', { edgeFileColumnValues });
@@ -328,6 +339,25 @@ export class Visual implements IVisual {
     }
 
     /**
+     * Provides conversion for corresponding arrays of columns and their
+     * values, assigning the speficied type as a prefix to the derived key.
+     * Values are also formatted according to each column's metadata.
+     */
+    private getEdgeValuesByType(
+        columns: DataViewMetadataColumn[],
+        values: DataViewCategoryColumn[],
+        type: 'Source' | 'Destination',
+    ) {
+        const combined = columns.map((c, ci) => ({
+            key: `${type} ${c.displayName}`,
+            value: values[ci].values.map((v) => {
+                return this.formatPrimitiveValue(v, c);
+            }),
+        }));
+        return combined.reduce((obj, item) => Object.assign(obj, { [item.key]: item.value }), {});
+    }
+
+    /**
      * Consolidates logic to flatten column names and column values with the
      * same delimeter.
      */
@@ -357,14 +387,22 @@ export class Visual implements IVisual {
             for (let ci = 0; ci < numCategories; ci += 1) {
                 const thisColumn = columns[ci];
                 const thisValue = values[ci].values[vi];
-                // Adjust date types correctly (sometimes they are not casted correctly depending on position in the data view)
-                const valueToFormat =
-                    thisColumn.type.dateTime && thisValue !== typeof Date ? new Date(<string>thisValue) : thisValue;
-                row.push(valueFormatter.format(valueToFormat, thisColumn.format));
+                row.push(this.formatPrimitiveValue(thisValue, thisColumn));
             }
             returnValues.push(this.getFlattenedValues(row));
         }
         return returnValues;
+    }
+
+    /**
+     * For a primitive value from the Power BI data view, check for a
+     * format specifier and apply it to the value. This handles situations with
+     * date types sometimes not being casted correctly in the data view (which
+     * depends on their position, for some reason).
+     */
+    private formatPrimitiveValue(value: PrimitiveValue, column: DataViewMetadataColumn) {
+        const valueToFormat = column.type.dateTime && value !== typeof Date ? new Date(<string>value) : value;
+        return valueFormatter.format(valueToFormat, column.format);
     }
 
     public update(options: VisualUpdateOptions, viewModel) {
