@@ -153,28 +153,33 @@ export class Visual implements IVisual {
     private uploadDataset(view: powerbi.DataView) {
         try {
             console.debug('@uploadDataset', { view });
-            /*
-        var nodeFile = new GraphistryFile(GraphistryFileType.Node);
-        nodeFile.setData({
-            "n":["a","b","c"],
-            "v":[2,4,6],
-            "v2":["a","aa","aaa"]
-        });
-        */
+
             const srcColMetadata = view.metadata.columns.filter((c) => c.roles.SourceNode);
             const srcColName = this.getFlattenedColumnNames(srcColMetadata);
-            const srcCol = view.categorical.categories.filter((c) => c.source.roles.SourceNode);
+            const srcColData = view.categorical.categories.filter((c) => c.source.roles.SourceNode);
+            const srcColValues = this.getFlattenedColumnValues(srcColMetadata, srcColData);
+            console.debug('Source column', {
+                metadata: srcColMetadata,
+                name: srcColName,
+                data: srcColData,
+                flattenedValues: srcColValues,
+            });
             const dstColMetadata = view.metadata.columns.filter((c) => c.roles.DestinationNode);
             const dstColName = this.getFlattenedColumnNames(dstColMetadata);
-            const dstCol = view.categorical.categories.filter((c) => c.source.roles.DestinationNode);
-            const edgePropertyMetadatas = view.metadata.columns.filter((c) => c.roles.EdgeProperty);
-            const edgeWeightMetadata = view.metadata.columns.find((c) => c.roles.EdgeWeight);
-            // categorical.values because measure?
-            const edgeWeightCol = edgeWeightMetadata
-                ? view.categorical.values.find((c) => c.source.displayName === edgeWeightMetadata.displayName)
-                : undefined;
-            const edgeWeightColName = edgeWeightMetadata ? edgeWeightMetadata.displayName : undefined;
-            console.debug('edgeWeights', { edgeWeightCol, edgeWeightColName });
+            const dstColData = view.categorical.categories.filter((c) => c.source.roles.DestinationNode);
+            const dstColValues = this.getFlattenedColumnValues(dstColMetadata, dstColData);
+            console.debug('Destination column', {
+                metadata: dstColMetadata,
+                name: dstColName,
+                data: dstColData,
+                flattenedValues: dstColValues,
+            });
+
+            // Set up NodeFile, and ensure that duplicates across source/destination are resolved.
+            const srcColExclusionIndices = this.getNodeExclusionIndices(srcColValues, dstColValues, 'Source');
+            console.debug('Source column exclusions', { srcColExclusionIndices });
+            const dstColExclusionIndices = this.getNodeExclusionIndices(srcColValues, dstColValues, 'Destination');
+            console.debug('Destination column exclusions', { dstColExclusionIndices });
             const sourcePropertyMetadata = view.metadata.columns.filter((c) => c.roles.SourceProperty);
             const sourcePropertyValues = view.categorical.categories.filter((c) => c.source.roles.SourceProperty);
             console.debug('Source properties', { sourcePropertyMetadata, sourcePropertyValues });
@@ -183,13 +188,39 @@ export class Visual implements IVisual {
                 (c) => c.source.roles.DestinationProperty,
             );
             console.debug('Destination properties', { destinationPropertyMetadata, destinationPropertyValues });
+            const nodeValues = this.getCombinedSourceDestinatioNodeValues(
+                this.getFlattenedColumnValues(srcColMetadata, srcColData),
+                srcColExclusionIndices,
+                this.getFlattenedColumnValues(dstColMetadata, dstColData),
+                dstColExclusionIndices,
+            );
+            const nodeFileColumnValues = {
+                n: nodeValues,
+                ...this.getNodePropertyValues(
+                    sourcePropertyMetadata,
+                    sourcePropertyValues,
+                    srcColExclusionIndices,
+                    destinationPropertyMetadata,
+                    destinationPropertyValues,
+                    dstColExclusionIndices,
+                ),
+            };
+            console.debug('nodeFileColumnValues', { nodeFileColumnValues });
+
+            // Set up EdgeFile
+            const edgePropertyMetadatas = view.metadata.columns.filter((c) => c.roles.EdgeProperty);
+            const edgeWeightMetadata = view.metadata.columns.find((c) => c.roles.EdgeWeight);
+            // categorical.values because measure?
+            const edgeWeightCol = edgeWeightMetadata
+                ? view.categorical.values.find((c) => c.source.displayName === edgeWeightMetadata.displayName)
+                : undefined;
+            const edgeWeightColName = edgeWeightMetadata ? edgeWeightMetadata.displayName : undefined;
+            console.debug('edgeWeights', { edgeWeightCol, edgeWeightColName });
 
             // upload edge values if new, else reuse edge file
             const edgeFileColumnValues = {
-                [srcColName]: this.getFlattenedColumnValues(srcColMetadata, srcCol),
-                [dstColName]: this.getFlattenedColumnValues(dstColMetadata, dstCol),
-                ...this.getEdgeValuesByType(sourcePropertyMetadata, sourcePropertyValues, 'Source'),
-                ...this.getEdgeValuesByType(destinationPropertyMetadata, destinationPropertyValues, 'Destination'),
+                [srcColName]: srcColValues,
+                [dstColName]: dstColValues,
                 ...(edgeWeightMetadata ? { [edgeWeightColName]: edgeWeightCol.values } : {}),
             };
             console.debug('edgeFileColumnValues', { edgeFileColumnValues });
@@ -241,8 +272,11 @@ export class Visual implements IVisual {
                 .every((check) => check);
             // eslint-disable-next-line prettier/prettier
             let {
-                prevFiles: { edgeFile },
+                prevFiles: { edgeFile, nodeFile },
             } = this;
+
+            nodeFile = new NodeFile();
+            nodeFile.setData(nodeFileColumnValues);
             const isReusedEdgeFile = edgeFile && edgeValuesAllSame;
             console.debug('duplicate isReusedEdgeFile', isReusedEdgeFile);
             if (!isReusedEdgeFile) {
@@ -295,14 +329,14 @@ export class Visual implements IVisual {
             // this.rootElement.append('<h2>Graphistry Visual: Uploading data...</h2>');
 
             const dataset = new Dataset(); // changed
-            // dataSet.addFile(nodeFile);
+            dataset.addFile(nodeFile);
             dataset.addFile(edgeFile);
             dataset.updateBindings(bindings);
             console.debug('dataset', { nodeFiles: dataset.nodeFiles, edgeFiles: dataset.edgeFiles });
 
-            const numEdges = srcCol[0].values.length;
+            const numEdges = srcColData[0].values.length;
             console.debug('Visual::uploadDataset() edges', { numEdges });
-            const numNodes = new Set(srcCol[0].values.concat(dstCol[0].values)).size;
+            const numNodes = new Set(srcColData[0].values.concat(dstColData[0].values)).size;
             console.debug('Visual::uploadDataset() nodes', { numNodes });
 
             // this.rootElement.append('Created local schema, now uploading...');
@@ -339,20 +373,66 @@ export class Visual implements IVisual {
     }
 
     /**
-     * Provides conversion for corresponding arrays of columns and their
-     * values, assigning the speficied type as a prefix to the derived key.
+     * For the supplied source/destination column metadata, values and
+     * exclusions, flatten the values to an array of formatted values, adjust
+     * their entries for exclusion indices and union the result. We then return
+     * an object of all propertis and their values for spreading into the
+     * nodeFile.
      * Values are also formatted according to each column's metadata.
      */
-    private getEdgeValuesByType(
+    private getNodePropertyValues(
+        sourceColumns: DataViewMetadataColumn[],
+        sourceColumnValues: DataViewCategoryColumn[],
+        sourceColumnExclusions: number[],
+        destinationColumns: DataViewMetadataColumn[],
+        destinationColumnValues: DataViewCategoryColumn[],
+        destinationColumnExclusions: number[],
+    ) {
+        const sourceProperties = this.getFlattenedPropertyValues(
+            sourceColumns,
+            sourceColumnValues,
+            sourceColumnExclusions,
+        );
+        const destinationProperties = this.getFlattenedPropertyValues(
+            destinationColumns,
+            destinationColumnValues,
+            destinationColumnExclusions,
+        );
+        const combined = [...sourceProperties, ...destinationProperties];
+        return combined.reduce((obj, item) => Object.assign(obj, { [item.key]: item.value }), {});
+    }
+
+    /**
+     * For a subset of columns, metadata and exclusions, returns an array of
+     * all collumns and values, processed and adjusted for exclusions. In the
+     * event that our exclusions result in an empty array (e.g. destination
+     * properties added to dataset, but all source nodes override them), we
+     * need to exclude this from the nodeFile to avoid errors server-side.
+     */
+    private getFlattenedPropertyValues(
         columns: DataViewMetadataColumn[],
         values: DataViewCategoryColumn[],
-        type: 'Source' | 'Destination',
+        exclusions: number[],
     ) {
-        const combined = columns.map((c, ci) => ({
-            key: `${type} ${c.displayName}`,
-            value: values[ci].values.map((v) => this.formatPrimitiveValue(v, c)),
-        }));
-        return combined.reduce((obj, item) => Object.assign(obj, { [item.key]: item.value }), {});
+        return columns.reduce(
+            (arr, item, index) => {
+                const key = `${item.displayName}`;
+                const value = this.getValuesFilteredForExclusion(
+                    values[index].values.map((v) => this.formatPrimitiveValue(v, item)),
+                    exclusions,
+                );
+                if (value.length > 0) {
+                    arr.push({ key, value });
+                }
+                return arr;
+            },
+            <
+                {
+                    key: string;
+                    value: string[];
+                }[]
+            >[],
+        );
     }
 
     /**
@@ -390,6 +470,61 @@ export class Visual implements IVisual {
             returnValues.push(this.getFlattenedValues(row));
         }
         return returnValues;
+    }
+
+    /**
+     * Because we need all rows for the edgeFile, we will use compare both
+     * arrays of Source & Destination IDs (flattened values) to obtain an array
+     * of indices that mark which should be excluded when assembling the
+     * nodeFile. Rules are currently as follows:
+     *
+     * - Source nodes:
+     *      - Resolved ID is empty (formatted as '(Blank)')
+     * - Destination nodes
+     *      - Resolved ID is empty (formatted as '(Blank)')
+     *      - Resolved ID is already in the Source array (taking the first
+     *          discovered node ID and their properties as the source of truth)
+     */
+    private getNodeExclusionIndices(
+        srcColValues: string[],
+        dstColValues: string[],
+        resolveType: 'Source' | 'Destination',
+    ) {
+        const dataset = resolveType === 'Source' ? srcColValues : dstColValues;
+        const blankValue = '(Blank)';
+        return dataset.reduce((arr: number[], item, index) => {
+            const isExcluded =
+                resolveType === 'Source' ? item === blankValue : item === blankValue || srcColValues.indexOf(item) > -1;
+            if (isExcluded) {
+                arr.push(index);
+            }
+            return arr;
+        }, []);
+    }
+
+    /**
+     * For given source and destination arrays and exclusion indices, return a
+     * consolidated array of both arrays (resolved for exclusions), that are
+     * suitable for inclusion in a nodeFile.
+     */
+    private getCombinedSourceDestinatioNodeValues(
+        sourceValues: string[],
+        sourceExclusions: number[],
+        destinationValues: string[],
+        destinationExclusions: number[],
+    ) {
+        return [
+            ...this.getValuesFilteredForExclusion(sourceValues, sourceExclusions),
+            ...this.getValuesFilteredForExclusion(destinationValues, destinationExclusions),
+        ];
+    }
+
+    /**
+     * Takes an array of values, and exclusion indices, and gives us the original
+     * array with those entries removed.
+     */
+    private getValuesFilteredForExclusion(values: string[], exclusions: number[]) {
+        return values.filter((v, i) => exclusions.indexOf(i) === -1);
     }
 
     /**
