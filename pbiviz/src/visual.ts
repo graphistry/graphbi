@@ -48,6 +48,7 @@ export class Visual implements IVisual {
         console.debug('Visual::constructor()');
         this.host = options.host;
         // this.locale = options.host.locale;
+        console.debug("Visual Constructor Client");
         this.client = new Client();
         this.rootElement = $(options.element);
         this.rootElement.append('<h2>Graphistry Visual: First set fields Source and Destination</h2>');
@@ -68,6 +69,7 @@ export class Visual implements IVisual {
             config,
             datasetID: this.datasetID,
             state: this.state,
+            client: this.client
         });
         this.target = options.element;
         ReactDOM.render(this.reactRoot, this.target);
@@ -319,6 +321,7 @@ export class Visual implements IVisual {
             config,
             datasetID: null,
             state: this.state,
+            client: this.client
         });
         ReactDOM.render(this.reactRoot, this.target);
     }
@@ -378,7 +381,10 @@ export class Visual implements IVisual {
         config.PositionLockedX = this.visualSettings.positionSetting.lockedX;
         config.PositionLockedY = this.visualSettings.positionSetting.lockedY;
         config.PositionLockedRadius = this.visualSettings.positionSetting.lockedR;
-        if (this.client && this.client.checkStale(config.UserName, config.Password, 'https', config.UrlBase, `https://${config.UrlBase}/`) // eslint-disable-line
+        const isSSO = true; //TODO FIXME
+        let authenticated = true;
+        const stopFromLoading = false;
+        if (this.client && this.client.checkStale(config.UserName, config.Password, 'https', config.UrlBase, `https://${config.UrlBase}`, isSSO, authenticated, stopFromLoading) // eslint-disable-line
         ) {
             console.debug('Visual::update() client is stale, resetting');
             this.client = new Client(
@@ -386,7 +392,10 @@ export class Visual implements IVisual {
                 config.Password,
                 'https',
                 config.UrlBase,
-                `https://${config.UrlBase}/`,
+                `https://${config.UrlBase}`,
+                isSSO,
+                authenticated,
+                stopFromLoading 
             );
         } else {
             console.debug('Visual::update() client is not stale');
@@ -407,6 +416,7 @@ export class Visual implements IVisual {
                 config,
                 datasetID: config.DatasetOverride,
                 state: this.state,
+                client: this.client
             });
             ReactDOM.render(this.reactRoot, this.target);
             console.debug('////update has DatasetOverride, stop');
@@ -427,6 +437,7 @@ export class Visual implements IVisual {
                 config,
                 datasetID: this.datasetID,
                 state: this.state,
+                client: this.client
             });
             ReactDOM.render(this.reactRoot, this.target);
             console.debug('////update not ready for upload, stop');
@@ -447,6 +458,7 @@ export class Visual implements IVisual {
                 config,
                 datasetID: this.datasetID,
                 state: this.state,
+                client: this.client
             });
             ReactDOM.render(this.reactRoot, this.target);
         }
@@ -462,6 +474,7 @@ export class Visual implements IVisual {
                 config,
                 datasetID: this.datasetID,
                 state: this.state,
+                client: this.client
             });
             ReactDOM.render(this.reactRoot, this.target);
         }
@@ -479,6 +492,7 @@ export class Visual implements IVisual {
                     config,
                     datasetID: this.datasetID,
                     state: this.state,
+                    client: this.client
                 });
                 ReactDOM.render(this.reactRoot, this.target);
             })
