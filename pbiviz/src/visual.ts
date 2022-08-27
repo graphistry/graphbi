@@ -25,6 +25,10 @@ import { LoadState } from './LoadState';
 
 import { Main } from './components/Main';
 
+interface IFileValues {
+    [x: string]: string[] | powerbi.PrimitiveValue[];
+}
+
 export class Visual implements IVisual {
     private host: IVisualHost;
 
@@ -142,7 +146,8 @@ export class Visual implements IVisual {
         return true;
     }
 
-    private prevValues = {};
+    private prevNodeValues: IFileValues = {};
+    private prevEdgeValues: IFileValues = {};
 
     private prevFiles = { edgeFile: null, nodeFile: null };
 
@@ -231,59 +236,33 @@ export class Visual implements IVisual {
             });
             console.debug('with settings', { srcColName, dstColName, edgeWeightColName, edgeFileColumnValues });
 
-            const edgeValuesAllSame = Object.keys(edgeFileColumnValues)
-                .map((colName) => {
-                    if (this.prevValues[colName] === edgeFileColumnValues[colName]) {
-                        return true;
-                    }
-                    console.debug(
-                        'edge alias delta on prop',
-                        colName,
-                        this.prevValues[colName],
-                        edgeFileColumnValues[colName],
-                    );
-                    if (!this.prevValues || !this.prevValues[colName] || !edgeFileColumnValues[colName]) {
-                        console.debug('missing ref');
-                        return false;
-                    }
-                    if (this.prevValues[colName].length !== edgeFileColumnValues[colName].length) {
-                        console.debug(
-                            'diff lengths',
-                            this.prevValues[colName].length,
-                            edgeFileColumnValues[colName].length,
-                        );
-                        return false;
-                    }
-                    for (let i = 0; i < this.prevValues[colName].length; i += 1) {
-                        // eslint-disable-line
-                        if (this.prevValues[colName][i] !== edgeFileColumnValues[colName][i]) {
-                            console.debug(
-                                'delta on i',
-                                i,
-                                this.prevValues[colName][i],
-                                edgeFileColumnValues[colName][i],
-                            );
-                            return false;
-                        }
-                    }
-                    console.debug('all column values same even if diff alias');
-                    return true;
-                })
-                .every((check) => check);
+            // TODO (DM-P): may need to re-use for NodeFile
+
+            console.debug('checking node file values against previous');
+            const nodeFileValuesAllSame = this.areFileValuesSame(nodeFileColumnValues, this.prevNodeValues);
+            console.debug('checking edge file values against previous');
+            const edgeValuesAllSame = this.areFileValuesSame(edgeFileColumnValues, this.prevEdgeValues);
             // eslint-disable-next-line prettier/prettier
             let {
                 prevFiles: { edgeFile, nodeFile },
             } = this;
 
-            nodeFile = new NodeFile();
-            nodeFile.setData(nodeFileColumnValues);
+            const isReusedNodeFile = nodeFile && nodeFileValuesAllSame;
+            console.debug('duplicate isReusedNodeFile', isReusedNodeFile);
+            if (!isReusedNodeFile) {
+                nodeFile = new NodeFile();
+                nodeFile.setData(nodeFileColumnValues);
+                this.prevFiles.nodeFile = nodeFile;
+                Object.assign(this.prevNodeValues, edgeFileColumnValues);
+            }
+
             const isReusedEdgeFile = edgeFile && edgeValuesAllSame;
             console.debug('duplicate isReusedEdgeFile', isReusedEdgeFile);
             if (!isReusedEdgeFile) {
                 edgeFile = new EdgeFile(); // change!
                 edgeFile.setData(edgeFileColumnValues);
                 this.prevFiles.edgeFile = edgeFile;
-                Object.assign(this.prevValues, edgeFileColumnValues);
+                Object.assign(this.prevEdgeValues, edgeFileColumnValues);
             }
 
             const bindings = {
@@ -316,7 +295,7 @@ export class Visual implements IVisual {
 
             // //////////////////////////////////////////////////////////////////////////////
 
-            if (this.previousRendered && isReusedEdgeFile && isReusedBindings) {
+            if (this.previousRendered && isReusedNodeFile && isReusedEdgeFile && isReusedBindings) {
                 console.debug('no change, reuse iframe');
                 return null;
             }
@@ -355,6 +334,37 @@ export class Visual implements IVisual {
             console.error('Visual::uploadDataset() error', e);
         }
         return null;
+    }
+
+    /**
+     * Determine if the current node/edge file values differ from previous values.
+     */
+    private areFileValuesSame(fileColumnValues: IFileValues, prevFileValues: IFileValues) {
+        return Object.keys(fileColumnValues)
+            .map((colName) => {
+                if (prevFileValues[colName] === fileColumnValues[colName]) {
+                    return true;
+                }
+                console.debug('alias delta on prop', colName, prevFileValues[colName], fileColumnValues[colName]);
+                if (!prevFileValues || !prevFileValues[colName] || !fileColumnValues[colName]) {
+                    console.debug('missing ref');
+                    return false;
+                }
+                if (prevFileValues[colName].length !== fileColumnValues[colName].length) {
+                    console.debug('diff lengths', prevFileValues[colName].length, fileColumnValues[colName].length);
+                    return false;
+                }
+                for (let i = 0; i < prevFileValues[colName].length; i += 1) {
+                    // eslint-disable-line
+                    if (prevFileValues[colName][i] !== fileColumnValues[colName][i]) {
+                        console.debug('delta on i', i, prevFileValues[colName][i], fileColumnValues[colName][i]);
+                        return false;
+                    }
+                }
+                console.debug('all column values same even if diff alias');
+                return true;
+            })
+            .every((check) => check);
     }
 
     private clear() {
