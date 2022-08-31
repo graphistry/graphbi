@@ -152,6 +152,7 @@ export class Visual implements IVisual {
     }
 
     private prevNodeValues: IFileValues = {};
+
     private prevEdgeValues: IFileValues = {};
 
     private prevFiles = { edgeFile: null, nodeFile: null };
