@@ -29,6 +29,11 @@ interface IFileValues {
     [x: string]: string[] | powerbi.PrimitiveValue[];
 }
 
+interface INodeIndex {
+    type: 'source' | 'destination';
+    index: number;
+}
+
 export class Visual implements IVisual {
     private host: IVisualHost;
 
@@ -181,10 +186,6 @@ export class Visual implements IVisual {
             });
 
             // Set up NodeFile, and ensure that duplicates across source/destination are resolved.
-            const srcColExclusionIndices = this.getNodeExclusionIndices(srcColValues, dstColValues, 'Source');
-            console.debug('Source column exclusions', { srcColExclusionIndices });
-            const dstColExclusionIndices = this.getNodeExclusionIndices(srcColValues, dstColValues, 'Destination');
-            console.debug('Destination column exclusions', { dstColExclusionIndices });
             const sourcePropertyMetadata = view.metadata.columns.filter((c) => c.roles.SourceProperty);
             const sourcePropertyValues = view.categorical.categories.filter((c) => c.source.roles.SourceProperty);
             console.debug('Source properties', { sourcePropertyMetadata, sourcePropertyValues });
@@ -193,21 +194,32 @@ export class Visual implements IVisual {
                 (c) => c.source.roles.DestinationProperty,
             );
             console.debug('Destination properties', { destinationPropertyMetadata, destinationPropertyValues });
-            const nodeValues = this.getCombinedSourceDestinatioNodeValues(
-                this.getFlattenedColumnValues(srcColMetadata, srcColData),
-                srcColExclusionIndices,
-                this.getFlattenedColumnValues(dstColMetadata, dstColData),
-                dstColExclusionIndices,
-            );
+
+            const sourceValues = this.getFlattenedColumnValues(srcColMetadata, srcColData);
+            const destinationValues = this.getFlattenedColumnValues(dstColMetadata, dstColData);
+            const sourceValuesUnique = [...new Set(sourceValues)];
+            const destinationValuesUnique = [...new Set(destinationValues)];
+            const nodeValuesUnique = [...new Set([...sourceValuesUnique, ...destinationValuesUnique])];
+            const nodeValueLookupIndices: INodeIndex[] = nodeValuesUnique.map((v) => {
+                const srcIndex = sourceValues.indexOf(v);
+                const dstIndex = destinationValues.indexOf(v);
+                return { type: srcIndex > -1 ? 'source' : 'destination', index: srcIndex > -1 ? srcIndex : dstIndex };
+            });
+            console.debug('Source and destination values', {
+                sourceValues,
+                destinationValues,
+                nodeValuesUnique,
+                nodeValueLookupIndices,
+            });
+
             const nodeFileColumnValues = {
-                n: nodeValues,
+                n: nodeValuesUnique,
                 ...this.getNodePropertyValues(
                     sourcePropertyMetadata,
                     sourcePropertyValues,
-                    srcColExclusionIndices,
                     destinationPropertyMetadata,
                     destinationPropertyValues,
-                    dstColExclusionIndices,
+                    nodeValueLookupIndices,
                 ),
             };
             console.debug('nodeFileColumnValues', { nodeFileColumnValues });
@@ -236,8 +248,6 @@ export class Visual implements IVisual {
             });
             console.debug('with settings', { srcColName, dstColName, edgeWeightColName, edgeFileColumnValues });
 
-            // TODO (DM-P): may need to re-use for NodeFile
-
             console.debug('checking node file values against previous');
             const nodeFileValuesAllSame = this.areFileValuesSame(nodeFileColumnValues, this.prevNodeValues);
             console.debug('checking edge file values against previous');
@@ -253,7 +263,7 @@ export class Visual implements IVisual {
                 nodeFile = new NodeFile();
                 nodeFile.setData(nodeFileColumnValues);
                 this.prevFiles.nodeFile = nodeFile;
-                Object.assign(this.prevNodeValues, edgeFileColumnValues);
+                Object.assign(this.prevNodeValues, nodeFileColumnValues);
             }
 
             const isReusedEdgeFile = edgeFile && edgeValuesAllSame;
@@ -393,43 +403,39 @@ export class Visual implements IVisual {
     private getNodePropertyValues(
         sourceColumns: DataViewMetadataColumn[],
         sourceColumnValues: DataViewCategoryColumn[],
-        sourceColumnExclusions: number[],
         destinationColumns: DataViewMetadataColumn[],
         destinationColumnValues: DataViewCategoryColumn[],
-        destinationColumnExclusions: number[],
+        nodeValueLookupIndices: INodeIndex[],
     ) {
         const sourceProperties = this.getFlattenedPropertyValues(
             sourceColumns,
             sourceColumnValues,
-            sourceColumnExclusions,
+            nodeValueLookupIndices,
         );
         const destinationProperties = this.getFlattenedPropertyValues(
             destinationColumns,
             destinationColumnValues,
-            destinationColumnExclusions,
+            nodeValueLookupIndices,
         );
         const combined = [...sourceProperties, ...destinationProperties];
         return combined.reduce((obj, item) => Object.assign(obj, { [item.key]: item.value }), {});
     }
 
     /**
-     * For a subset of columns, metadata and exclusions, returns an array of
-     * all collumns and values, processed and adjusted for exclusions. In the
-     * event that our exclusions result in an empty array (e.g. destination
-     * properties added to dataset, but all source nodes override them), we
-     * need to exclude this from the nodeFile to avoid errors server-side.
+     * For a subset of columns, and their corresponding values from the data
+     * view (in conjunction with the list of node indices to use), returns an
+     * array of all columns and values that pertain to those indices.
      */
     private getFlattenedPropertyValues(
         columns: DataViewMetadataColumn[],
         values: DataViewCategoryColumn[],
-        exclusions: number[],
+        nodeValueLookupIndices: INodeIndex[],
     ) {
         return columns.reduce(
             (arr, item, index) => {
                 const key = `${item.displayName}`;
-                const value = this.getValuesFilteredForExclusion(
-                    values[index].values.map((v) => this.formatPrimitiveValue(v, item)),
-                    exclusions,
+                const value = nodeValueLookupIndices.map((v) =>
+                    this.formatPrimitiveValue(values[index].values[v.index], item),
                 );
                 if (value.length > 0) {
                     arr.push({ key, value });
@@ -480,61 +486,6 @@ export class Visual implements IVisual {
             returnValues.push(this.getFlattenedValues(row));
         }
         return returnValues;
-    }
-
-    /**
-     * Because we need all rows for the edgeFile, we will use compare both
-     * arrays of Source & Destination IDs (flattened values) to obtain an array
-     * of indices that mark which should be excluded when assembling the
-     * nodeFile. Rules are currently as follows:
-     *
-     * - Source nodes:
-     *      - Resolved ID is empty (formatted as '(Blank)')
-     * - Destination nodes
-     *      - Resolved ID is empty (formatted as '(Blank)')
-     *      - Resolved ID is already in the Source array (taking the first
-     *          discovered node ID and their properties as the source of truth)
-     */
-    private getNodeExclusionIndices(
-        srcColValues: string[],
-        dstColValues: string[],
-        resolveType: 'Source' | 'Destination',
-    ) {
-        const dataset = resolveType === 'Source' ? srcColValues : dstColValues;
-        const blankValue = '(Blank)';
-        return dataset.reduce((arr: number[], item, index) => {
-            const isExcluded =
-                resolveType === 'Source' ? item === blankValue : item === blankValue || srcColValues.indexOf(item) > -1;
-            if (isExcluded) {
-                arr.push(index);
-            }
-            return arr;
-        }, []);
-    }
-
-    /**
-     * For given source and destination arrays and exclusion indices, return a
-     * consolidated array of both arrays (resolved for exclusions), that are
-     * suitable for inclusion in a nodeFile.
-     */
-    private getCombinedSourceDestinatioNodeValues(
-        sourceValues: string[],
-        sourceExclusions: number[],
-        destinationValues: string[],
-        destinationExclusions: number[],
-    ) {
-        return [
-            ...this.getValuesFilteredForExclusion(sourceValues, sourceExclusions),
-            ...this.getValuesFilteredForExclusion(destinationValues, destinationExclusions),
-        ];
-    }
-
-    /**
-     * Takes an array of values, and exclusion indices, and gives us the original
-     * array with those entries removed.
-     */
-    private getValuesFilteredForExclusion(values: string[], exclusions: number[]) {
-        return values.filter((v, i) => exclusions.indexOf(i) === -1);
     }
 
     /**
