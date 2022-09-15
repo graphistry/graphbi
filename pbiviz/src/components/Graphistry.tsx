@@ -33,7 +33,7 @@ function Graphistry(
                 : numNodes < 5000 ? 1
                 : numNodes < 20000 ? 3
                 : 5;
-            const url = `https://${config.UrlBase}/graph/graph.html?dataset=${datasetID}&play=${play}`;
+            const url = `https://${config.UrlBase}/graph/graph.html?dataset=${datasetID}&play=1}`;
             const extraOpts = {
                 play,
                 showSplashScreen: config.ChartLoadShowSplashScreen,
