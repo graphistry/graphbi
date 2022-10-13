@@ -7,6 +7,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # Latest
 
+## 4.0.9 - 2022-07-28
+
+### Fix 
+
+- **capabilities.json**: Edges are no longer capped at 1000.
+
+
 ## 4.0.6 - 2022-06-30
 
 ### Features
