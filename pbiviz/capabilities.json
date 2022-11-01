@@ -26,13 +26,13 @@
             "displayNameKey": "Visual_SourceProperty",
             "name": "SourceProperty",
             "kind": "Grouping",
-            "displayName": "Source node properties (not implemented)"
+            "displayName": "Source node properties"
         },
         {
             "displayNameKey": "Visual_DestinationProperty",
             "name": "DestinationProperty",
             "kind": "Grouping",
-            "displayName": "Destination node properties (not implemented)"
+            "displayName": "Destination node properties"
         },
         {
             "displayNameKey": "Visual_EdgeProperty",
