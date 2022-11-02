@@ -33,16 +33,19 @@ function Graphistry(
                 : numNodes < 5000 ? 1
                 : numNodes < 20000 ? 3
                 : 5;
+
+            const resolveColor(v) => v && v.solid && v.solid.color ? v.solid.color : null;
+
             const url = `https://${config.UrlBase}/graph/graph.html?dataset=${datasetID}&play=${play}`;
             const extraOpts = {
                 play,
                 showSplashScreen: config.ChartLoadShowSplashScreen,
-                backgroundColor: config.BackgroundColor,
+                backgroundColor: resolveColor(config.BackgroundColor),
                 lockedX: config.PositionLockedX,
                 lockedY: config.PositionLockedY,
                 lockedR: config.PositionLockedRadius,
-                labelBackground: config.LabelBackground,
-                labelColor: config.LabelColor,
+                labelBackground: resolveColor(config.LabelBackground.solid.color),
+                labelColor: resolveColor(config.LabelColor.solid.color),
                 showPointsOfInterest: config.LabelShowPointsOfInterest,
                 showPointsOfInterestLabels: config.LabelShowPointsOfInterestLabels,
                 showLabelOnHover: config.LabelShowLabelOnHover,
