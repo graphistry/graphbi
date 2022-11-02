@@ -81,7 +81,7 @@ const config: GraphistryConfiguration = {
     NodeOpacity: undefined,
     NodeSize: undefined,
     NodeTitle: undefined,
-    PanelShowHistograms: false,
+    PanelShowHistograms: true,
     PanelShowTimebars: false,
     PositionX: undefined,
     PositionY: undefined,

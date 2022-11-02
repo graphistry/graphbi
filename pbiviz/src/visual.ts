@@ -17,12 +17,22 @@ import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInst
 import DataView = powerbi.DataView;
 import DataViewMetadataColumn = powerbi.DataViewMetadataColumn;
 import DataViewCategoryColumn = powerbi.DataViewCategoryColumn;
+import PrimitiveValue = powerbi.PrimitiveValue;
 import { VisualSettings } from './VisualSettings';
 
 import { config } from './services/GraphistryClient';
 import { LoadState } from './LoadState';
 
 import { Main } from './components/Main';
+
+interface IFileValues {
+    [x: string]: string[] | powerbi.PrimitiveValue[];
+}
+
+interface INodeIndex {
+    type: 'source' | 'destination';
+    index: number;
+}
 
 export class Visual implements IVisual {
     private host: IVisualHost;
@@ -141,7 +151,9 @@ export class Visual implements IVisual {
         return true;
     }
 
-    private prevValues = {};
+    private prevNodeValues: IFileValues = {};
+
+    private prevEdgeValues: IFileValues = {};
 
     private prevFiles = { edgeFile: null, nodeFile: null };
 
@@ -152,20 +164,68 @@ export class Visual implements IVisual {
     private uploadDataset(view: powerbi.DataView) {
         try {
             console.debug('@uploadDataset', { view });
-            /*
-        var nodeFile = new GraphistryFile(GraphistryFileType.Node);
-        nodeFile.setData({
-            "n":["a","b","c"],
-            "v":[2,4,6],
-            "v2":["a","aa","aaa"]
-        });
-        */
+
             const srcColMetadata = view.metadata.columns.filter((c) => c.roles.SourceNode);
             const srcColName = this.getFlattenedColumnNames(srcColMetadata);
-            const srcCol = view.categorical.categories.filter((c) => c.source.roles.SourceNode);
+            const srcColData = view.categorical.categories.filter((c) => c.source.roles.SourceNode);
+            const srcColValues = this.getFlattenedColumnValues(srcColMetadata, srcColData);
+            console.debug('Source column', {
+                metadata: srcColMetadata,
+                name: srcColName,
+                data: srcColData,
+                flattenedValues: srcColValues,
+            });
             const dstColMetadata = view.metadata.columns.filter((c) => c.roles.DestinationNode);
             const dstColName = this.getFlattenedColumnNames(dstColMetadata);
-            const dstCol = view.categorical.categories.filter((c) => c.source.roles.DestinationNode);
+            const dstColData = view.categorical.categories.filter((c) => c.source.roles.DestinationNode);
+            const dstColValues = this.getFlattenedColumnValues(dstColMetadata, dstColData);
+            console.debug('Destination column', {
+                metadata: dstColMetadata,
+                name: dstColName,
+                data: dstColData,
+                flattenedValues: dstColValues,
+            });
+
+            // Set up NodeFile, and ensure that duplicates across source/destination are resolved.
+            const sourcePropertyMetadata = view.metadata.columns.filter((c) => c.roles.SourceProperty);
+            const sourcePropertyValues = view.categorical.categories.filter((c) => c.source.roles.SourceProperty);
+            console.debug('Source properties', { sourcePropertyMetadata, sourcePropertyValues });
+            const destinationPropertyMetadata = view.metadata.columns.filter((c) => c.roles.DestinationProperty);
+            const destinationPropertyValues = view.categorical.categories.filter(
+                (c) => c.source.roles.DestinationProperty,
+            );
+            console.debug('Destination properties', { destinationPropertyMetadata, destinationPropertyValues });
+
+            const sourceValues = this.getFlattenedColumnValues(srcColMetadata, srcColData);
+            const destinationValues = this.getFlattenedColumnValues(dstColMetadata, dstColData);
+            const sourceValuesUnique = [...new Set(sourceValues)];
+            const destinationValuesUnique = [...new Set(destinationValues)];
+            const nodeValuesUnique = [...new Set([...sourceValuesUnique, ...destinationValuesUnique])];
+            const nodeValueLookupIndices: INodeIndex[] = nodeValuesUnique.map((v) => {
+                const srcIndex = sourceValues.indexOf(v);
+                const dstIndex = destinationValues.indexOf(v);
+                return { type: srcIndex > -1 ? 'source' : 'destination', index: srcIndex > -1 ? srcIndex : dstIndex };
+            });
+            console.debug('Source and destination values', {
+                sourceValues,
+                destinationValues,
+                nodeValuesUnique,
+                nodeValueLookupIndices,
+            });
+
+            const nodeFileColumnValues = {
+                n: nodeValuesUnique,
+                ...this.getNodePropertyValues(
+                    sourcePropertyMetadata,
+                    sourcePropertyValues,
+                    destinationPropertyMetadata,
+                    destinationPropertyValues,
+                    nodeValueLookupIndices,
+                ),
+            };
+            console.debug('nodeFileColumnValues', { nodeFileColumnValues });
+
+            // Set up EdgeFile
             const edgePropertyMetadatas = view.metadata.columns.filter((c) => c.roles.EdgeProperty);
             const edgeWeightMetadata = view.metadata.columns.find((c) => c.roles.EdgeWeight);
             // categorical.values because measure?
@@ -177,8 +237,8 @@ export class Visual implements IVisual {
 
             // upload edge values if new, else reuse edge file
             const edgeFileColumnValues = {
-                [srcColName]: this.getFlattenedColumnValues(srcColMetadata, srcCol),
-                [dstColName]: this.getFlattenedColumnValues(dstColMetadata, dstCol),
+                [srcColName]: srcColValues,
+                [dstColName]: dstColValues,
                 ...(edgeWeightMetadata ? { [edgeWeightColName]: edgeWeightCol.values } : {}),
             };
             console.debug('edgeFileColumnValues', { edgeFileColumnValues });
@@ -189,56 +249,31 @@ export class Visual implements IVisual {
             });
             console.debug('with settings', { srcColName, dstColName, edgeWeightColName, edgeFileColumnValues });
 
-            const edgeValuesAllSame = Object.keys(edgeFileColumnValues)
-                .map((colName) => {
-                    if (this.prevValues[colName] === edgeFileColumnValues[colName]) {
-                        return true;
-                    }
-                    console.debug(
-                        'edge alias delta on prop',
-                        colName,
-                        this.prevValues[colName],
-                        edgeFileColumnValues[colName],
-                    );
-                    if (!this.prevValues || !this.prevValues[colName] || !edgeFileColumnValues[colName]) {
-                        console.debug('missing ref');
-                        return false;
-                    }
-                    if (this.prevValues[colName].length !== edgeFileColumnValues[colName].length) {
-                        console.debug(
-                            'diff lengths',
-                            this.prevValues[colName].length,
-                            edgeFileColumnValues[colName].length,
-                        );
-                        return false;
-                    }
-                    for (let i = 0; i < this.prevValues[colName].length; i += 1) {
-                        // eslint-disable-line
-                        if (this.prevValues[colName][i] !== edgeFileColumnValues[colName][i]) {
-                            console.debug(
-                                'delta on i',
-                                i,
-                                this.prevValues[colName][i],
-                                edgeFileColumnValues[colName][i],
-                            );
-                            return false;
-                        }
-                    }
-                    console.debug('all column values same even if diff alias');
-                    return true;
-                })
-                .every((check) => check);
+            console.debug('checking node file values against previous');
+            const nodeFileValuesAllSame = this.areFileValuesSame(nodeFileColumnValues, this.prevNodeValues);
+            console.debug('checking edge file values against previous');
+            const edgeValuesAllSame = this.areFileValuesSame(edgeFileColumnValues, this.prevEdgeValues);
             // eslint-disable-next-line prettier/prettier
             let {
-                prevFiles: { edgeFile },
+                prevFiles: { edgeFile, nodeFile },
             } = this;
+
+            const isReusedNodeFile = nodeFile && nodeFileValuesAllSame;
+            console.debug('duplicate isReusedNodeFile', isReusedNodeFile);
+            if (!isReusedNodeFile) {
+                nodeFile = new NodeFile();
+                nodeFile.setData(nodeFileColumnValues);
+                this.prevFiles.nodeFile = nodeFile;
+                Object.assign(this.prevNodeValues, nodeFileColumnValues);
+            }
+
             const isReusedEdgeFile = edgeFile && edgeValuesAllSame;
             console.debug('duplicate isReusedEdgeFile', isReusedEdgeFile);
             if (!isReusedEdgeFile) {
                 edgeFile = new EdgeFile(); // change!
                 edgeFile.setData(edgeFileColumnValues);
                 this.prevFiles.edgeFile = edgeFile;
-                Object.assign(this.prevValues, edgeFileColumnValues);
+                Object.assign(this.prevEdgeValues, edgeFileColumnValues);
             }
 
             const bindings = {
@@ -271,7 +306,7 @@ export class Visual implements IVisual {
 
             // //////////////////////////////////////////////////////////////////////////////
 
-            if (this.previousRendered && isReusedEdgeFile && isReusedBindings) {
+            if (this.previousRendered && isReusedNodeFile && isReusedEdgeFile && isReusedBindings) {
                 console.debug('no change, reuse iframe');
                 return null;
             }
@@ -284,14 +319,14 @@ export class Visual implements IVisual {
             // this.rootElement.append('<h2>Graphistry Visual: Uploading data...</h2>');
 
             const dataset = new Dataset(); // changed
-            // dataSet.addFile(nodeFile);
+            dataset.addFile(nodeFile);
             dataset.addFile(edgeFile);
             dataset.updateBindings(bindings);
             console.debug('dataset', { nodeFiles: dataset.nodeFiles, edgeFiles: dataset.edgeFiles });
 
-            const numEdges = srcCol[0].values.length;
+            const numEdges = srcColData[0].values.length;
             console.debug('Visual::uploadDataset() edges', { numEdges });
-            const numNodes = new Set(srcCol[0].values.concat(dstCol[0].values)).size;
+            const numNodes = new Set(srcColData[0].values.concat(dstColData[0].values)).size;
             console.debug('Visual::uploadDataset() nodes', { numNodes });
 
             // this.rootElement.append('Created local schema, now uploading...');
@@ -312,6 +347,37 @@ export class Visual implements IVisual {
         return null;
     }
 
+    /**
+     * Determine if the current node/edge file values differ from previous values.
+     */
+    private areFileValuesSame(fileColumnValues: IFileValues, prevFileValues: IFileValues) {
+        return Object.keys(fileColumnValues)
+            .map((colName) => {
+                if (prevFileValues[colName] === fileColumnValues[colName]) {
+                    return true;
+                }
+                console.debug('alias delta on prop', colName, prevFileValues[colName], fileColumnValues[colName]);
+                if (!prevFileValues || !prevFileValues[colName] || !fileColumnValues[colName]) {
+                    console.debug('missing ref');
+                    return false;
+                }
+                if (prevFileValues[colName].length !== fileColumnValues[colName].length) {
+                    console.debug('diff lengths', prevFileValues[colName].length, fileColumnValues[colName].length);
+                    return false;
+                }
+                for (let i = 0; i < prevFileValues[colName].length; i += 1) {
+                    // eslint-disable-line
+                    if (prevFileValues[colName][i] !== fileColumnValues[colName][i]) {
+                        console.debug('delta on i', i, prevFileValues[colName][i], fileColumnValues[colName][i]);
+                        return false;
+                    }
+                }
+                console.debug('all column values same even if diff alias');
+                return true;
+            })
+            .every((check) => check);
+    }
+
     private clear() {
         this.state = LoadState.MISCONFIGURED;
         this.reactRoot = <React.ReactElement<any>>React.createElement(Main, {
@@ -325,6 +391,65 @@ export class Visual implements IVisual {
             state: this.state,
         });
         ReactDOM.render(this.reactRoot, this.target);
+    }
+
+    /**
+     * For the supplied source/destination column metadata, values and
+     * exclusions, flatten the values to an array of formatted values, adjust
+     * their entries for exclusion indices and union the result. We then return
+     * an object of all propertis and their values for spreading into the
+     * nodeFile.
+     * Values are also formatted according to each column's metadata.
+     */
+    private getNodePropertyValues(
+        sourceColumns: DataViewMetadataColumn[],
+        sourceColumnValues: DataViewCategoryColumn[],
+        destinationColumns: DataViewMetadataColumn[],
+        destinationColumnValues: DataViewCategoryColumn[],
+        nodeValueLookupIndices: INodeIndex[],
+    ) {
+        const sourceProperties = this.getFlattenedPropertyValues(
+            sourceColumns,
+            sourceColumnValues,
+            nodeValueLookupIndices,
+        );
+        const destinationProperties = this.getFlattenedPropertyValues(
+            destinationColumns,
+            destinationColumnValues,
+            nodeValueLookupIndices,
+        );
+        const combined = [...sourceProperties, ...destinationProperties];
+        return combined.reduce((obj, item) => Object.assign(obj, { [item.key]: item.value }), {});
+    }
+
+    /**
+     * Return array of columns nodeValueLookupIndices subset mapped to formatted primitive values
+     * If nodeValueLookupIndices empty, return an empty array
+     * TODO: Why does this drop empties and focus only on nodeValueLookupIndices?
+     */
+    private getFlattenedPropertyValues(
+        columns: DataViewMetadataColumn[],
+        values: DataViewCategoryColumn[],
+        nodeValueLookupIndices: INodeIndex[],
+    ): { key: string; value: string[] }[] {
+        return columns.reduce(
+            (arrs, column, index) => {
+                const key = `${column.displayName}`;
+                const value = nodeValueLookupIndices.map((v) =>
+                    this.formatPrimitiveValue(values[index].values[v.index], column),
+                );
+                if (value.length > 0) {
+                    arrs.push({ key, value });
+                }
+                return arrs;
+            },
+            <
+                {
+                    key: string;
+                    value: string[];
+                }[]
+            >[],
+        );
     }
 
     /**
@@ -357,14 +482,22 @@ export class Visual implements IVisual {
             for (let ci = 0; ci < numCategories; ci += 1) {
                 const thisColumn = columns[ci];
                 const thisValue = values[ci].values[vi];
-                // Adjust date types correctly (sometimes they are not casted correctly depending on position in the data view)
-                const valueToFormat =
-                    thisColumn.type.dateTime && thisValue !== typeof Date ? new Date(<string>thisValue) : thisValue;
-                row.push(valueFormatter.format(valueToFormat, thisColumn.format));
+                row.push(this.formatPrimitiveValue(thisValue, thisColumn));
             }
             returnValues.push(this.getFlattenedValues(row));
         }
         return returnValues;
+    }
+
+    /**
+     * For a primitive value from the Power BI data view, check for a
+     * format specifier and apply it to the value. This handles situations with
+     * date types sometimes not being casted correctly in the data view (which
+     * depends on their position, for some reason).
+     */
+    private formatPrimitiveValue(value: PrimitiveValue, column: DataViewMetadataColumn) {
+        const valueToFormat = column.type.dateTime && value !== typeof Date ? new Date(<string>value) : value;
+        return valueFormatter.format(valueToFormat, column.format);
     }
 
     public update(options: VisualUpdateOptions, viewModel) {

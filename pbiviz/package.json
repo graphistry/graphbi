@@ -18,8 +18,8 @@
         "version:update": "export RELEASE_VERSION=${RELEASE_VERSION:-dev} && echo \"Rewriting pbiviz.json.template->pbiviz.json using RELEASE_VERSION: $RELEASE_VERSION\" && envsubst '$RELEASE_VERSION' < pbiviz.json.template > pbiviz.json"
     },
     "dependencies": {
-        "@graphistry/client-api": "4.1.5",
-        "@graphistry/client-api-react": "4.1.5",
+        "@graphistry/client-api": "4.2.0",
+        "@graphistry/client-api-react": "4.2.0",
         "jquery": "3.6.0",
         "powerbi-visuals-api": "~4.0.0",
         "powerbi-visuals-utils-dataviewutils": "2.4.1",
