@@ -64,7 +64,7 @@ function Graphistry(
                 pointsOfInterestMax: config.LabelPointsOfInterestMax
             };
             const extraOptsDefined = {};
-            for (const k in extraOpts) {
+            for (const k of Object.keys(extraOpts)) {
                 if (extraOpts[k] !== undefined && extraOpts[k] !== null) {
                     extraOptsDefined[k] = extraOpts[k];
                 }
