@@ -57,11 +57,12 @@ jobs:
         find ./dist
         echo “pwd: $(pwd)”
     - name: Release
-      uses: softprops/action-gh-release@v1
+      uses: ncipollo/release-action@v1
       with:
         name: ${{ env.RELEASE_VERSION }}
-        tag_name: ${{ env.RELEASE_VERSION }}
+        tag: ${{ env.RELEASE_VERSION }}
         token: ${{ secrets.GITHUB_TOKEN }}
-        files: |
+        artifactErrorsFailBuild: true
+        artifacts: |
           /home/runner/work/graphbi/graphbi/pbiviz/dist/Graphistry.${{ env.RELEASE_VERSION }}.pbiviz
   

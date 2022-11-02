@@ -5,11 +5,17 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # Development
 
-## 4.11.1 - 2022-11-02
+## 4.11.3 - 2022-11-02
 
 ### Changed
 
-- **GHA**: Update actions
+- **GHA**: Update actions - publish
+
+## 4.11.2 - 2022-11-02
+
+### Changed
+
+- **GHA**: Update actions - checkout
 
 ## 4.10.0 - 2022-11-01
 
