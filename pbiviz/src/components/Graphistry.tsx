@@ -61,16 +61,24 @@ function Graphistry(
                 precisionVsSpeed: config.LayoutPrecisionVsSpeed,
                 scalingRatio: config.LayoutScalingRatio,
                 showArrows: config.EdgeShowArrows,
-
-                ...(config.LabelPointsOfInterestMax !== undefined ? {pointsOfInterestMax: config.LabelPointsOfInterestMax} : {}),
+                pointsOfInterestMax: config.LabelPointsOfInterestMax
             };
-            console.debug('Graphistry::render2', {url, datasetID, UrlBase: config.UrlBase, extraOpts});
+            const extraOptsDefined = {};
+            for (const k in extraOpts) {
+                if (extraOpts[k] !== undefined && extraOpts[k] !== null) {
+                    extraOptsDefined[k] = extraOpts[k];
+                }
+            }
+            console.debug('Graphistry::render2', {url, datasetID, UrlBase: config.UrlBase, extraOpts, extraOptsDefined});
             return (<>
                 <GraphistryJS
                     dataset={datasetID}
                     graphistryHost={`https://${config.UrlBase}`}
-                    containerStyle={{'height': 'calc(100% - 75px)'}}
-                    {...extraOpts}
+                    containerStyle={{
+                        'height': 'calc(100% - 75px)',
+                        'transform': 'none'
+                    }}
+                    {...extraOptsDefined}
                 />
                 <h3>
                    {/* tslint:disable-next-line */}
