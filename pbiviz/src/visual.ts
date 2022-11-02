@@ -431,7 +431,7 @@ export class Visual implements IVisual {
         columns: DataViewMetadataColumn[],
         values: DataViewCategoryColumn[],
         nodeValueLookupIndices: INodeIndex[],
-    ): {key: string, value: string[]}[] {
+    ): { key: string; value: string[] }[] {
         return columns.reduce(
             (arrs, column, index) => {
                 const key = `${column.displayName}`;
