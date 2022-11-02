@@ -423,25 +423,25 @@ export class Visual implements IVisual {
     }
 
     /**
-     * For a subset of columns, and their corresponding values from the data
-     * view (in conjunction with the list of node indices to use), returns an
-     * array of all columns and values that pertain to those indices.
+     * Return array of columns nodeValueLookupIndices subset mapped to formatted primitive values
+     * If nodeValueLookupIndices empty, return an empty array
+     * TODO: Why does this drop empties and focus only on nodeValueLookupIndices?
      */
     private getFlattenedPropertyValues(
         columns: DataViewMetadataColumn[],
         values: DataViewCategoryColumn[],
         nodeValueLookupIndices: INodeIndex[],
-    ) {
+    ): {key: string, value: string[]}[] {
         return columns.reduce(
-            (arr, item, index) => {
-                const key = `${item.displayName}`;
+            (arrs, column, index) => {
+                const key = `${column.displayName}`;
                 const value = nodeValueLookupIndices.map((v) =>
-                    this.formatPrimitiveValue(values[index].values[v.index], item),
+                    this.formatPrimitiveValue(values[index].values[v.index], column),
                 );
                 if (value.length > 0) {
-                    arr.push({ key, value });
+                    arrs.push({ key, value });
                 }
-                return arr;
+                return arrs;
             },
             <
                 {
