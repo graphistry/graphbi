@@ -5,6 +5,12 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # Development
 
+## 4.11.1 - 2022-11-02
+
+### Changed
+
+- **GHA**: Update actions
+
 ## 4.10.0 - 2022-11-01
 
 May require a Graphistry server 2.39.31+
