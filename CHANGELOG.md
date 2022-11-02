@@ -5,6 +5,10 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # Development
 
+## 4.10.0 - 2022-11-01
+
+May require a Graphistry server 2.39.31+
+
 ### Features
 
 - **node properties**: Mapping fields to node source/destination properties causes them to appear as node properties. Currently only well-defined when unique for each node.
@@ -16,7 +20,8 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Fix
 
 - **Hello**: Revert use of bad client-api version that was not showing graphs
-
+- **layout**: Layout button works again - avoid sending null/undefined values
+- **histograms**: Enable by default
 
 # Latest
 
