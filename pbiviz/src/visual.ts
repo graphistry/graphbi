@@ -188,11 +188,15 @@ export class Visual implements IVisual {
 
             // Set up NodeFile, and ensure that duplicates across source/destination are resolved.
             const sourcePropertyMetadata = view.metadata.columns.filter((c) => c.roles.SourceProperty);
-            const sourcePropertyValues = view.categorical.categories.filter((c) => c.source.roles.SourceProperty);
+            const sourcePropertyValues = this.getUniqueCategoryValuesByRole(
+                view.categorical.categories,
+                'SourceProperty',
+            );
             console.debug('Source properties', { sourcePropertyMetadata, sourcePropertyValues });
             const destinationPropertyMetadata = view.metadata.columns.filter((c) => c.roles.DestinationProperty);
-            const destinationPropertyValues = view.categorical.categories.filter(
-                (c) => c.source.roles.DestinationProperty,
+            const destinationPropertyValues = this.getUniqueCategoryValuesByRole(
+                view.categorical.categories,
+                'DestinationProperty',
             );
             console.debug('Destination properties', { destinationPropertyMetadata, destinationPropertyValues });
 
@@ -391,6 +395,27 @@ export class Visual implements IVisual {
             state: this.state,
         });
         ReactDOM.render(this.reactRoot, this.target);
+    }
+
+    /**
+     * If the same columns are used in different data roles, Power BI will map
+     * them multiple times, resulting in duplicate value arrays, where we will
+     * only want them for the specified data role of interest. This method
+     * iterates the categories for the specified role and only ensures that the
+     * desired categorical values are only added once per occurrence.
+     */
+    private getUniqueCategoryValuesByRole(categories: DataViewCategoryColumn[], role: string) {
+        const uniqueCategoryValues: DataViewCategoryColumn[] = [];
+        categories
+            .filter((c) => c.source.roles[role])
+            .forEach((c) => {
+                const isDuplicate =
+                    uniqueCategoryValues.findIndex((uc) => uc.source.queryName === c.source.queryName) >= 0;
+                if (!isDuplicate) {
+                    uniqueCategoryValues.push(c);
+                }
+            });
+        return uniqueCategoryValues;
     }
 
     /**
